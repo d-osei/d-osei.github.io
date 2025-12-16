@@ -111,12 +111,12 @@
             <div class="mb-10">
                 <h3 class="text-xl font-bold text-red-600 mb-3">3.1 The Challenge: Creating the Installer</h3>
                 <p class="text-stone-700 mb-4">
-                    The installation of the ESXi hypervisor presented a key technical challenge. [cite_start]Standard graphical tools failed to create a bootable drive for this specific hardware configuration (Dell OptiPlex 7440). [cite: 44, 45, 46]
+                    The installation of the ESXi hypervisor presented a key technical challenge. Standard graphical tools failed to create a bootable drive for this specific hardware configuration (Dell OptiPlex 7440). 
                 </p>
                 <div class="flex flex-col md:flex-row gap-6">
                     <div class="flex-1">
                         <p class="text-stone-700 mb-2">
-                            <strong>The Failure:</strong> I initially attempted to use <code>balenaEtcher</code> to flash the ISO. [cite_start]However, it failed to create a partition table that the Dell BIOS could recognize. [cite: 47, 48]
+                            <strong>The Failure:</strong> I initially attempted to use <code>balenaEtcher</code> to flash the ISO. However, it failed to create a partition table that the Dell BIOS could recognize. 
                         </p>
                         <ul class="list-disc list-inside text-stone-600 ml-2">
                             <li>Missing partition table warning.</li>
@@ -133,7 +133,7 @@
             <div class="mb-10">
                 <h3 class="text-xl font-bold text-green-700 mb-3">3.2 The Solution: Native Terminal Formatting</h3>
                 <p class="text-stone-700 mb-4">
-                    [cite_start]To resolve this, I bypassed GUI tools and utilized macOS native terminal utilities to manually structure the drive with an MBR (Master Boot Record) partition map and FAT32 file system. [cite: 102, 103]
+                    To resolve this, I bypassed GUI tools and utilized macOS native terminal utilities to manually structure the drive with an MBR (Master Boot Record) partition map and FAT32 file system. 
                 </p>
 
                 <div class="space-y-6">
@@ -170,7 +170,7 @@ cp -Rv /Volumes/ESXI-INSTALLER/* /Volumes/ESXI/
             <div class="mb-10">
                 <h3 class="text-xl font-bold text-stone-800 mb-3">3.3 Boot Configuration Edit</h3>
                 <p class="text-stone-700 mb-4">
-                    To ensure the bootloader could locate the kernel, I edited the <code>isolinux.cfg</code> file, modifying the APPEND line to include <code>-p 1</code>. [cite_start]This prevents "Bank not found" errors. [cite: 143, 163]
+                    To ensure the bootloader could locate the kernel, I edited the <code>isolinux.cfg</code> file, modifying the APPEND line to include <code>-p 1</code>. This prevents "Bank not found" errors. 
                 </p>
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6 items-center">
                     <div class="code-block h-full flex items-center">

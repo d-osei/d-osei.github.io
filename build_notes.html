@@ -8,8 +8,22 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&family=JetBrains+Mono:wght@400&display=swap" rel="stylesheet">
     <style>
         body { font-family: 'Inter', sans-serif; background-color: #FAFAF9; color: #1C1917; }
-        code { font-family: 'JetBrains Mono', monospace; }
-        .code-block { background-color: #1E293B; color: #E2E8F0; padding: 1rem; border-radius: 0.5rem; overflow-x: auto; font-size: 0.875rem; margin-top: 0.5rem; margin-bottom: 0.5rem; border-left: 4px solid #F59E0B; }
+        
+        /* Updated Code Block Styling */
+        .code-block { 
+            background-color: #1E293B; 
+            color: #E2E8F0; 
+            padding: 1rem; 
+            border-radius: 0.5rem; 
+            overflow-x: auto; 
+            font-family: 'JetBrains Mono', monospace; 
+            font-size: 0.875rem; 
+            margin-top: 0.5rem; 
+            margin-bottom: 0.5rem; 
+            border-left: 4px solid #F59E0B;
+            white-space: pre; /* CRITICAL FIX */
+        }
+
         .spec-table th { background-color: #F5F5F4; color: #57534E; font-weight: 600; text-align: left; padding: 0.75rem; border-bottom: 1px solid #E7E5E4; }
         .spec-table td { padding: 0.75rem; border-bottom: 1px solid #E7E5E4; color: #44403C; }
         .fix-box { background-color: #FEF2F2; border: 1px solid #FCA5A5; border-radius: 0.5rem; padding: 1rem; margin-top: 1rem; }
@@ -42,7 +56,7 @@
             </div>
             <h1 class="text-4xl font-extrabold text-stone-900 mb-4">Lab Build Notes & Configuration Hacks</h1>
             <p class="text-lg text-stone-600 max-w-3xl">
-                This document serves as the "Runbook" for rebuilding the lab environment. It contains specific configuration hacks, command-line fixes, and topology requirements to restore the lab to a working state after a reset.
+                This document serves as the "Runbook" for rebuilding the lab environment. [cite_start]It contains specific configuration hacks, command-line fixes, and topology requirements to restore the lab to a working state after a reset [cite: 492-493].
             </p>
         </div>
 
@@ -72,7 +86,7 @@
         <section id="gateway" class="mb-16 scroll-mt-24">
             <div class="flex items-center justify-between mb-6">
                 <h2 class="text-3xl font-bold text-stone-800">1. SOC-Gateway (pfSense)</h2>
-                <span class="text-sm bg-stone-100 px-3 py-1 rounded text-stone-500">The Air Gap</span>
+                [cite_start]<span class="text-sm bg-stone-100 px-3 py-1 rounded text-stone-500">The Air Gap [cite: 499]</span>
             </div>
             
             <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
@@ -80,9 +94,9 @@
                     <div class="bg-white rounded-lg shadow-sm border border-stone-200 overflow-hidden">
                         <table class="w-full spec-table text-sm">
                             <tr><th>OS</th><td>FreeBSD (Other 64-bit)</td></tr>
-                            <tr><th>vCPU</th><td>1</td></tr>
-                            <tr><th>RAM</th><td>1 GB</td></tr>
-                            <tr><th>Storage</th><td>8 GB</td></tr>
+                            [cite_start]<tr><th>vCPU</th><td>1 [cite: 504]</td></tr>
+                            [cite_start]<tr><th>RAM</th><td>1 GB [cite: 506]</td></tr>
+                            [cite_start]<tr><th>Storage</th><td>8 GB [cite: 508]</td></tr>
                             <tr><th>Network 1</th><td>WAN (VM Network)</td></tr>
                             <tr><th>Network 2</th><td>LAN_Isolated</td></tr>
                         </table>
@@ -92,21 +106,21 @@
                 <div class="lg:col-span-2 space-y-6">
                     <div class="fix-box">
                         <div class="fix-title">⚠️ The "Invisible Disk" Fix</div>
-                        <p class="text-sm text-stone-700 mb-2"><strong>Issue:</strong> The installer may fail to find a hard drive during setup.</p>
-                        <p class="text-sm text-stone-700"><strong>Fix:</strong> In ESXi "Edit Settings", ensure SCSI Controller 0 is set to <strong>LSI Logic SAS</strong>. Do not use VMware Paravirtual.</p>
+                        [cite_start]<p class="text-sm text-stone-700 mb-2"><strong>Issue:</strong> The installer may fail to find a hard drive during setup[cite: 514].</p>
+                        <p class="text-sm text-stone-700"><strong>Fix:</strong> In ESXi "Edit Settings", ensure SCSI Controller 0 is set to <strong>LSI Logic SAS</strong>. [cite_start]Do not use VMware Paravirtual[cite: 515].</p>
                     </div>
 
                     <div class="bg-white p-6 rounded-lg border border-stone-200 shadow-sm">
                         <h3 class="font-bold text-stone-800 mb-4">Critical Configuration Steps</h3>
                         <ul class="list-decimal list-inside space-y-3 text-sm text-stone-600">
-                            <li><strong>Interface Assignment:</strong> WAN = <code>vmx0</code> (DHCP), LAN = <code>vmx1</code> (Static).</li>
-                            <li><strong>IP Config (LAN):</strong> Set IP to <code>172.16.10.1</code> / 24. Enable DHCP Server (Range: .100 to .200).</li>
+                            [cite_start]<li><strong>Interface Assignment:</strong> WAN = <code>vmx0</code> (DHCP), LAN = <code>vmx1</code> (Static)[cite: 517].</li>
+                            [cite_start]<li><strong>IP Config (LAN):</strong> Set IP to <code>172.16.10.1</code> / 24. Enable DHCP Server (Range: .100 to .200) [cite: 517-518].</li>
                             <li>
                                 <strong>Firewall Rule "Gotcha":</strong>
                                 <span class="block mt-1 ml-4 p-2 bg-stone-50 border-l-2 border-amber-400 text-stone-500 italic">
-                                    By default, pfSense blocks RFC1918 (Private Networks) on WAN. Since the lab WAN is your home LAN (10.0.x.x), this kills internet.
+                                    By default, pfSense blocks RFC1918 (Private Networks) on WAN. [cite_start]Since the lab WAN is your home LAN (10.0.x.x), this kills internet[cite: 520].
                                 </span>
-                                <span class="block mt-1 ml-4 font-bold text-stone-700">Action: Interfaces > WAN > Uncheck "Block private networks" & "Block bogon networks".</span>
+                                [cite_start]<span class="block mt-1 ml-4 font-bold text-stone-700">Action: Interfaces > WAN > Uncheck "Block private networks" & "Block bogon networks"[cite: 521].</span>
                             </li>
                         </ul>
                     </div>
@@ -125,10 +139,10 @@
                     <div class="bg-white rounded-lg shadow-sm border border-stone-200 overflow-hidden">
                         <table class="w-full spec-table text-sm">
                             <tr><th>OS</th><td>Windows 11 Ent.</td></tr>
-                            <tr><th>vCPU</th><td>2</td></tr>
-                            <tr><th>RAM</th><td>6 GB</td></tr>
-                            <tr><th>Storage</th><td>60 GB</td></tr>
-                            <tr><th>Network</th><td>LAN_Isolated</td></tr>
+                            [cite_start]<tr><th>vCPU</th><td>2 [cite: 527]</td></tr>
+                            [cite_start]<tr><th>RAM</th><td>6 GB [cite: 527]</td></tr>
+                            [cite_start]<tr><th>Storage</th><td>60 GB [cite: 527]</td></tr>
+                            [cite_start]<tr><th>Network</th><td>LAN_Isolated [cite: 527]</td></tr>
                         </table>
                     </div>
                 </div>
@@ -137,15 +151,15 @@
                     
                     <div class="bg-white p-5 rounded-lg border border-stone-200 shadow-sm">
                         <h3 class="font-bold text-stone-800 mb-2">Hack 1: The TPM Bypass</h3>
-                        <p class="text-sm text-stone-600 mb-2">ESXi cannot natively support Windows 11 requirements without complex encryption. When the installer fails:</p>
+                        <p class="text-sm text-stone-600 mb-2">ESXi cannot natively support Windows 11 requirements without complex encryption. [cite_start]When the installer fails[cite: 528]:</p>
                         <ol class="list-decimal list-inside text-sm text-stone-600 ml-2 mb-2">
-                            <li>Press <code>Shift + F10</code> to open CMD.</li>
-                            <li>Type <code>regedit</code> and go to <code>HKEY_LOCAL_MACHINE\SYSTEM\Setup</code>.</li>
-                            <li>Create Key <code>LabConfig</code> with DWORDs set to <strong>1</strong>:
+                            [cite_start]<li>Press <code>Shift + F10</code> to open CMD[cite: 529].</li>
+                            [cite_start]<li>Type <code>regedit</code> and go to <code>HKEY_LOCAL_MACHINE\SYSTEM\Setup</code>[cite: 530].</li>
+                            [cite_start]<li>Create Key <code>LabConfig</code> with DWORDs set to <strong>1</strong>[cite: 531]:
                                 <ul class="list-disc ml-6 mt-1 text-stone-500">
-                                    <li>BypassTPMCheck</li>
-                                    <li>BypassSecureBootCheck</li>
-                                    <li>BypassRAMCheck</li>
+                                    [cite_start]<li>BypassTPMCheck [cite: 532]</li>
+                                    [cite_start]<li>BypassSecureBootCheck [cite: 533]</li>
+                                    [cite_start]<li>BypassRAMCheck [cite: 534]</li>
                                 </ul>
                             </li>
                         </ol>
@@ -153,19 +167,15 @@
 
                     <div class="bg-white p-5 rounded-lg border border-stone-200 shadow-sm">
                         <h3 class="font-bold text-stone-800 mb-2">Hack 2: Enable Copy/Paste</h3>
-                        <p class="text-sm text-stone-600 mb-2">Edit VM Settings > VM Options > Advanced > Edit Configuration. Add:</p>
-                        <div class="code-block">
-isolation.tools.copy.disable = FALSE
-isolation.tools.paste.disable = FALSE
-                        </div>
+                        <p class="text-sm text-stone-600 mb-2">Edit VM Settings > VM Options > Advanced > Edit Configuration. [cite_start]Add [cite: 536-537]:</p>
+                        <pre class="code-block">isolation.tools.copy.disable = FALSE
+isolation.tools.paste.disable = FALSE</pre>
                     </div>
 
                     <div class="bg-white p-5 rounded-lg border border-stone-200 shadow-sm">
                         <h3 class="font-bold text-stone-800 mb-2">Hack 3: Allow Ping (ICMP)</h3>
-                        <p class="text-sm text-stone-600">Run in PowerShell (Admin) to allow network troubleshooting:</p>
-                        <div class="code-block">
-New-NetFirewallRule -DisplayName "Allow Ping" -Protocol ICMPv4
-                        </div>
+                        [cite_start]<p class="text-sm text-stone-600">Run in PowerShell (Admin) to allow network troubleshooting[cite: 539]:</p>
+                        <pre class="code-block">New-NetFirewallRule -DisplayName "Allow Ping" -Protocol ICMPv4</pre>
                     </div>
 
                 </div>
@@ -175,17 +185,17 @@ New-NetFirewallRule -DisplayName "Allow Ping" -Protocol ICMPv4
         <section id="splunk" class="mb-16 scroll-mt-24">
             <div class="flex items-center justify-between mb-6">
                 <h2 class="text-3xl font-bold text-stone-800">3. Ubuntu-Splunk (SIEM)</h2>
-                <span class="text-sm bg-stone-100 px-3 py-1 rounded text-stone-500">The Watchtower</span>
+                [cite_start]<span class="text-sm bg-stone-100 px-3 py-1 rounded text-stone-500">The Watchtower [cite: 542]</span>
             </div>
 
             <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
                 <div class="lg:col-span-1">
                     <div class="bg-white rounded-lg shadow-sm border border-stone-200 overflow-hidden">
                         <table class="w-full spec-table text-sm">
-                            <tr><th>OS</th><td>Ubuntu Server 22.04</td></tr>
-                            <tr><th>vCPU</th><td>2</td></tr>
-                            <tr><th>RAM</th><td>4 GB</td></tr>
-                            <tr><th>Storage</th><td>50 GB</td></tr>
+                            [cite_start]<tr><th>OS</th><td>Ubuntu Server 22.04 [cite: 543]</td></tr>
+                            [cite_start]<tr><th>vCPU</th><td>2 [cite: 543]</td></tr>
+                            [cite_start]<tr><th>RAM</th><td>4 GB [cite: 543]</td></tr>
+                            [cite_start]<tr><th>Storage</th><td>50 GB [cite: 543]</td></tr>
                         </table>
                     </div>
                 </div>
@@ -194,8 +204,7 @@ New-NetFirewallRule -DisplayName "Allow Ping" -Protocol ICMPv4
                     
                     <div class="bg-white p-5 rounded-lg border border-stone-200 shadow-sm">
                         <h3 class="font-bold text-stone-800 mb-2">Installation Commands</h3>
-                        <div class="code-block">
-# 1. Download & Install
+                        <pre class="code-block"># 1. Download & Install
 wget -O splunk.deb 'https://download.splunk.com/...'
 sudo dpkg -i splunk.deb
 
@@ -203,19 +212,19 @@ sudo dpkg -i splunk.deb
 sudo groupadd splunk
 sudo useradd -d /opt/splunk -m -g splunk splunk
 sudo chown -R splunk:splunk /opt/splunk
-sudo -u splunk /opt/splunk/bin/splunk start --accept-license
-                        </div>
+sudo -u splunk /opt/splunk/bin/splunk start --accept-license</pre>
+                        [cite_start]<p class="text-xs text-stone-500 mt-2">Source: [cite: 545-546]</p>
                     </div>
 
                     <div class="fix-box">
                         <div class="fix-title">⚠️ Disk Space & Timezone Fixes</div>
                         <ul class="list-disc list-inside text-sm text-stone-700 space-y-2">
                             <li>
-                                <strong>Disk Threshold:</strong> Splunk pauses if free space &lt; 5GB. Fix by editing <code>server.conf</code> to set <code>minFreeSpace = 2000</code>.
+                                <strong>Disk Threshold:</strong> Splunk pauses if free space &lt; 5GB. [cite_start]Fix by editing <code>server.conf</code> to set <code>minFreeSpace = 2000</code>[cite: 548].
                             </li>
                             <li>
                                 <strong>Time Drift:</strong> Fix log timestamps by aligning server to local time:
-                                <br><code>sudo timedatectl set-timezone America/Denver</code>
+                                [cite_start]<br><code class="bg-red-50 px-1 rounded">sudo timedatectl set-timezone America/Denver</code> [cite: 549]
                             </li>
                         </ul>
                     </div>
@@ -227,37 +236,33 @@ sudo -u splunk /opt/splunk/bin/splunk start --accept-license
         <section id="sysmon" class="mb-16 scroll-mt-24 bg-stone-900 text-stone-300 p-8 rounded-2xl shadow-lg">
             <div class="flex items-center justify-between mb-6">
                 <h2 class="text-3xl font-bold text-white">4. Sysmon Deployment</h2>
-                <span class="text-sm bg-stone-800 px-3 py-1 rounded text-stone-400">Advanced Telemetry</span>
+                [cite_start]<span class="text-sm bg-stone-800 px-3 py-1 rounded text-stone-400">Advanced Telemetry [cite: 551]</span>
             </div>
             
-            <p class="mb-6 text-stone-400">Replaces standard Windows Event Logs with granular data on Process Creation, Network Connections, and File Changes.</p>
+            [cite_start]<p class="mb-6 text-stone-400">Replaces standard Windows Event Logs with granular data on Process Creation, Network Connections, and File Changes[cite: 552].</p>
 
             <div class="space-y-8">
                 <div>
                     <h3 class="text-xl font-bold text-white mb-2">1. Installation</h3>
-                    <p class="text-sm text-stone-400 mb-2">Download <code>Sysmon.zip</code> and <code>sysmonconfig.xml</code> (SwiftOnSecurity). Run via Admin PowerShell:</p>
-                    <div class="code-block border-l-sky-500">
-.\Sysmon64.exe -accepteula -i sysmonconfig.xml
-                    </div>
+                    <p class="text-sm text-stone-400 mb-2">Download <code>Sysmon.zip</code> and <code>sysmonconfig.xml</code> (SwiftOnSecurity). [cite_start]Run via Admin PowerShell[cite: 554]:</p>
+                    <pre class="code-block border-l-sky-500">.\Sysmon64.exe -accepteula -i sysmonconfig.xml</pre>
                 </div>
 
                 <div>
                     <h3 class="text-xl font-bold text-white mb-2">2. Splunk Integration (inputs.conf)</h3>
-                    <p class="text-sm text-stone-400 mb-2">Configure the Universal Forwarder to read the Sysmon channel:</p>
-                    <div class="code-block border-l-sky-500">
-[WinEventLog://Microsoft-Windows-Sysmon/Operational]
+                    [cite_start]<p class="text-sm text-stone-400 mb-2">Configure the Universal Forwarder to read the Sysmon channel[cite: 557]:</p>
+                    <pre class="code-block border-l-sky-500">[WinEventLog://Microsoft-Windows-Sysmon/Operational]
 disabled = 0
 start_from = oldest
 current_only = 0
 checkpointInterval = 5
-renderXml = true
-                    </div>
-                    <p class="text-xs text-amber-400 mt-2">Note: Ensure the file extension is .conf, not .conf.txt!</p>
+renderXml = true</pre>
+                    [cite_start]<p class="text-xs text-amber-400 mt-2">Note: Ensure the file extension is .conf, not .conf.txt! [cite: 559]</p>
                 </div>
                 
                 <div>
                     <h3 class="text-xl font-bold text-white mb-2">3. Verification</h3>
-                    <p class="text-sm text-stone-400">Open <strong>Event Viewer</strong> > Applications and Services > Microsoft > Windows > Sysmon > Operational. Look for <strong>Event ID 1</strong> (Process Create).</p>
+                    <p class="text-sm text-stone-400">Open <strong>Event Viewer</strong> > Applications and Services > Microsoft > Windows > Sysmon > Operational. [cite_start]Look for <strong>Event ID 1</strong> (Process Create) [cite: 561-562].</p>
                 </div>
             </div>
         </section>
@@ -265,7 +270,7 @@ renderXml = true
     </main>
 
     <footer class="bg-white border-t border-stone-200 py-8 text-center mt-auto">
-        <p class="text-stone-500 text-sm">&copy; 2025 d-osei Portfolio. Lab Documentation.</p>
+        <p class="text-stone-500 text-sm">&copy; 2025 d-osei Portfolio. [cite_start]Lab Documentation[cite: 563].</p>
     </footer>
 
 </body>

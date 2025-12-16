@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lab Build Notes & Disaster Recovery</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&family=JetBrains+Mono:wght@400&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; background-color: #FAFAF9; color: #1C1917; }
+        code { font-family: 'JetBrains Mono', monospace; }
+        .code-block { background-color: #1E293B; color: #E2E8F0; padding: 1rem; border-radius: 0.5rem; overflow-x: auto; font-size: 0.875rem; margin-top: 0.5rem; margin-bottom: 0.5rem; border-left: 4px solid #F59E0B; }
+        .spec-table th { background-color: #F5F5F4; color: #57534E; font-weight: 600; text-align: left; padding: 0.75rem; border-bottom: 1px solid #E7E5E4; }
+        .spec-table td { padding: 0.75rem; border-bottom: 1px solid #E7E5E4; color: #44403C; }
+        .fix-box { background-color: #FEF2F2; border: 1px solid #FCA5A5; border-radius: 0.5rem; padding: 1rem; margin-top: 1rem; }
+        .fix-title { color: #991B1B; font-weight: 700; margin-bottom: 0.5rem; display: flex; align-items: center; gap: 0.5rem; }
+    </style>
+</head>
+<body class="antialiased min-h-screen flex flex-col">
+
+    <header class="bg-white border-b border-stone-200 sticky top-0 z-50 shadow-sm">
+        <div class="max-w-6xl mx-auto px-4 h-16 flex items-center justify-between">
+            <div class="flex items-center gap-2">
+                <span class="text-2xl">🛠️</span>
+                <a href="index.html" class="text-xl font-bold text-stone-800 hover:text-sky-600 transition">d-osei Portfolio</a>
+            </div>
+            <nav class="hidden md:flex space-x-6 text-sm font-medium text-stone-600">
+                <a href="index.html" class="hover:text-sky-600 transition">Home</a>
+                <a href="lab-infrastructure.html" class="text-sky-600 font-bold hover:text-sky-800 transition">Lab Infrastructure</a>
+                <a href="tier1.html" class="hover:text-sky-600 transition">Tier-1</a>
+                <a href="tier2.html" class="hover:text-sky-600 transition">Tier-2</a>
+            </nav>
+        </div>
+    </header>
+
+    <main class="flex-grow max-w-6xl mx-auto px-4 py-12 w-full">
+
+        <div class="mb-12 border-b border-stone-200 pb-8">
+            <div class="flex items-center gap-3 mb-4">
+                <span class="bg-amber-100 text-amber-800 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wide">Disaster Recovery Plan</span>
+                <a href="lab-infrastructure.html" class="bg-stone-100 text-stone-600 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wide hover:bg-stone-200 transition">← Back to Topology</a>
+            </div>
+            <h1 class="text-4xl font-extrabold text-stone-900 mb-4">Lab Build Notes & Configuration Hacks</h1>
+            <p class="text-lg text-stone-600 max-w-3xl">
+                This document serves as the "Runbook" for rebuilding the lab environment. It contains specific configuration hacks, command-line fixes, and topology requirements to restore the lab to a working state after a reset.
+            </p>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-16">
+            <a href="#gateway" class="p-4 bg-white border border-stone-200 rounded-lg shadow-sm hover:shadow-md transition text-center group">
+                <span class="block text-2xl mb-2">🛡️</span>
+                <span class="font-bold text-stone-700 group-hover:text-sky-600">SOC-Gateway</span>
+                <span class="block text-xs text-stone-400">pfSense Firewall</span>
+            </a>
+            <a href="#victim" class="p-4 bg-white border border-stone-200 rounded-lg shadow-sm hover:shadow-md transition text-center group">
+                <span class="block text-2xl mb-2">💻</span>
+                <span class="font-bold text-stone-700 group-hover:text-sky-600">Win11-Victim</span>
+                <span class="block text-xs text-stone-400">Target Endpoint</span>
+            </a>
+            <a href="#splunk" class="p-4 bg-white border border-stone-200 rounded-lg shadow-sm hover:shadow-md transition text-center group">
+                <span class="block text-2xl mb-2">📊</span>
+                <span class="font-bold text-stone-700 group-hover:text-sky-600">Ubuntu-Splunk</span>
+                <span class="block text-xs text-stone-400">SIEM Server</span>
+            </a>
+            <a href="#sysmon" class="p-4 bg-white border border-stone-200 rounded-lg shadow-sm hover:shadow-md transition text-center group">
+                <span class="block text-2xl mb-2">👁️</span>
+                <span class="font-bold text-stone-700 group-hover:text-sky-600">Sysmon</span>
+                <span class="block text-xs text-stone-400">Telemetry Config</span>
+            </a>
+        </div>
+
+        <section id="gateway" class="mb-16 scroll-mt-24">
+            <div class="flex items-center justify-between mb-6">
+                <h2 class="text-3xl font-bold text-stone-800">1. SOC-Gateway (pfSense)</h2>
+                <span class="text-sm bg-stone-100 px-3 py-1 rounded text-stone-500">The Air Gap</span>
+            </div>
+            
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                <div class="lg:col-span-1">
+                    <div class="bg-white rounded-lg shadow-sm border border-stone-200 overflow-hidden">
+                        <table class="w-full spec-table text-sm">
+                            <tr><th>OS</th><td>FreeBSD (Other 64-bit)</td></tr>
+                            <tr><th>vCPU</th><td>1</td></tr>
+                            <tr><th>RAM</th><td>1 GB</td></tr>
+                            <tr><th>Storage</th><td>8 GB</td></tr>
+                            <tr><th>Network 1</th><td>WAN (VM Network)</td></tr>
+                            <tr><th>Network 2</th><td>LAN_Isolated</td></tr>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="lg:col-span-2 space-y-6">
+                    <div class="fix-box">
+                        <div class="fix-title">⚠️ The "Invisible Disk" Fix</div>
+                        <p class="text-sm text-stone-700 mb-2"><strong>Issue:</strong> The installer may fail to find a hard drive during setup.</p>
+                        <p class="text-sm text-stone-700"><strong>Fix:</strong> In ESXi "Edit Settings", ensure SCSI Controller 0 is set to <strong>LSI Logic SAS</strong>. Do not use VMware Paravirtual.</p>
+                    </div>
+
+                    <div class="bg-white p-6 rounded-lg border border-stone-200 shadow-sm">
+                        <h3 class="font-bold text-stone-800 mb-4">Critical Configuration Steps</h3>
+                        <ul class="list-decimal list-inside space-y-3 text-sm text-stone-600">
+                            <li><strong>Interface Assignment:</strong> WAN = <code>vmx0</code> (DHCP), LAN = <code>vmx1</code> (Static).</li>
+                            <li><strong>IP Config (LAN):</strong> Set IP to <code>172.16.10.1</code> / 24. Enable DHCP Server (Range: .100 to .200).</li>
+                            <li>
+                                <strong>Firewall Rule "Gotcha":</strong>
+                                <span class="block mt-1 ml-4 p-2 bg-stone-50 border-l-2 border-amber-400 text-stone-500 italic">
+                                    By default, pfSense blocks RFC1918 (Private Networks) on WAN. Since the lab WAN is your home LAN (10.0.x.x), this kills internet.
+                                </span>
+                                <span class="block mt-1 ml-4 font-bold text-stone-700">Action: Interfaces > WAN > Uncheck "Block private networks" & "Block bogon networks".</span>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="victim" class="mb-16 scroll-mt-24">
+            <div class="flex items-center justify-between mb-6">
+                <h2 class="text-3xl font-bold text-stone-800">2. Win11-Victim (Endpoint)</h2>
+                <span class="text-sm bg-stone-100 px-3 py-1 rounded text-stone-500">Primary Target</span>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                <div class="lg:col-span-1">
+                    <div class="bg-white rounded-lg shadow-sm border border-stone-200 overflow-hidden">
+                        <table class="w-full spec-table text-sm">
+                            <tr><th>OS</th><td>Windows 11 Ent.</td></tr>
+                            <tr><th>vCPU</th><td>2</td></tr>
+                            <tr><th>RAM</th><td>6 GB</td></tr>
+                            <tr><th>Storage</th><td>60 GB</td></tr>
+                            <tr><th>Network</th><td>LAN_Isolated</td></tr>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="lg:col-span-2 space-y-6">
+                    
+                    <div class="bg-white p-5 rounded-lg border border-stone-200 shadow-sm">
+                        <h3 class="font-bold text-stone-800 mb-2">Hack 1: The TPM Bypass</h3>
+                        <p class="text-sm text-stone-600 mb-2">ESXi cannot natively support Windows 11 requirements without complex encryption. When the installer fails:</p>
+                        <ol class="list-decimal list-inside text-sm text-stone-600 ml-2 mb-2">
+                            <li>Press <code>Shift + F10</code> to open CMD.</li>
+                            <li>Type <code>regedit</code> and go to <code>HKEY_LOCAL_MACHINE\SYSTEM\Setup</code>.</li>
+                            <li>Create Key <code>LabConfig</code> with DWORDs set to <strong>1</strong>:
+                                <ul class="list-disc ml-6 mt-1 text-stone-500">
+                                    <li>BypassTPMCheck</li>
+                                    <li>BypassSecureBootCheck</li>
+                                    <li>BypassRAMCheck</li>
+                                </ul>
+                            </li>
+                        </ol>
+                    </div>
+
+                    <div class="bg-white p-5 rounded-lg border border-stone-200 shadow-sm">
+                        <h3 class="font-bold text-stone-800 mb-2">Hack 2: Enable Copy/Paste</h3>
+                        <p class="text-sm text-stone-600 mb-2">Edit VM Settings > VM Options > Advanced > Edit Configuration. Add:</p>
+                        <div class="code-block">
+isolation.tools.copy.disable = FALSE
+isolation.tools.paste.disable = FALSE
+                        </div>
+                    </div>
+
+                    <div class="bg-white p-5 rounded-lg border border-stone-200 shadow-sm">
+                        <h3 class="font-bold text-stone-800 mb-2">Hack 3: Allow Ping (ICMP)</h3>
+                        <p class="text-sm text-stone-600">Run in PowerShell (Admin) to allow network troubleshooting:</p>
+                        <div class="code-block">
+New-NetFirewallRule -DisplayName "Allow Ping" -Protocol ICMPv4
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </section>
+
+        <section id="splunk" class="mb-16 scroll-mt-24">
+            <div class="flex items-center justify-between mb-6">
+                <h2 class="text-3xl font-bold text-stone-800">3. Ubuntu-Splunk (SIEM)</h2>
+                <span class="text-sm bg-stone-100 px-3 py-1 rounded text-stone-500">The Watchtower</span>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                <div class="lg:col-span-1">
+                    <div class="bg-white rounded-lg shadow-sm border border-stone-200 overflow-hidden">
+                        <table class="w-full spec-table text-sm">
+                            <tr><th>OS</th><td>Ubuntu Server 22.04</td></tr>
+                            <tr><th>vCPU</th><td>2</td></tr>
+                            <tr><th>RAM</th><td>4 GB</td></tr>
+                            <tr><th>Storage</th><td>50 GB</td></tr>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="lg:col-span-2 space-y-6">
+                    
+                    <div class="bg-white p-5 rounded-lg border border-stone-200 shadow-sm">
+                        <h3 class="font-bold text-stone-800 mb-2">Installation Commands</h3>
+                        <div class="code-block">
+# 1. Download & Install
+wget -O splunk.deb 'https://download.splunk.com/...'
+sudo dpkg -i splunk.deb
+
+# 2. Setup User & Start
+sudo groupadd splunk
+sudo useradd -d /opt/splunk -m -g splunk splunk
+sudo chown -R splunk:splunk /opt/splunk
+sudo -u splunk /opt/splunk/bin/splunk start --accept-license
+                        </div>
+                    </div>
+
+                    <div class="fix-box">
+                        <div class="fix-title">⚠️ Disk Space & Timezone Fixes</div>
+                        <ul class="list-disc list-inside text-sm text-stone-700 space-y-2">
+                            <li>
+                                <strong>Disk Threshold:</strong> Splunk pauses if free space &lt; 5GB. Fix by editing <code>server.conf</code> to set <code>minFreeSpace = 2000</code>.
+                            </li>
+                            <li>
+                                <strong>Time Drift:</strong> Fix log timestamps by aligning server to local time:
+                                <br><code>sudo timedatectl set-timezone America/Denver</code>
+                            </li>
+                        </ul>
+                    </div>
+
+                </div>
+            </div>
+        </section>
+
+        <section id="sysmon" class="mb-16 scroll-mt-24 bg-stone-900 text-stone-300 p-8 rounded-2xl shadow-lg">
+            <div class="flex items-center justify-between mb-6">
+                <h2 class="text-3xl font-bold text-white">4. Sysmon Deployment</h2>
+                <span class="text-sm bg-stone-800 px-3 py-1 rounded text-stone-400">Advanced Telemetry</span>
+            </div>
+            
+            <p class="mb-6 text-stone-400">Replaces standard Windows Event Logs with granular data on Process Creation, Network Connections, and File Changes.</p>
+
+            <div class="space-y-8">
+                <div>
+                    <h3 class="text-xl font-bold text-white mb-2">1. Installation</h3>
+                    <p class="text-sm text-stone-400 mb-2">Download <code>Sysmon.zip</code> and <code>sysmonconfig.xml</code> (SwiftOnSecurity). Run via Admin PowerShell:</p>
+                    <div class="code-block border-l-sky-500">
+.\Sysmon64.exe -accepteula -i sysmonconfig.xml
+                    </div>
+                </div>
+
+                <div>
+                    <h3 class="text-xl font-bold text-white mb-2">2. Splunk Integration (inputs.conf)</h3>
+                    <p class="text-sm text-stone-400 mb-2">Configure the Universal Forwarder to read the Sysmon channel:</p>
+                    <div class="code-block border-l-sky-500">
+[WinEventLog://Microsoft-Windows-Sysmon/Operational]
+disabled = 0
+start_from = oldest
+current_only = 0
+checkpointInterval = 5
+renderXml = true
+                    </div>
+                    <p class="text-xs text-amber-400 mt-2">Note: Ensure the file extension is .conf, not .conf.txt!</p>
+                </div>
+                
+                <div>
+                    <h3 class="text-xl font-bold text-white mb-2">3. Verification</h3>
+                    <p class="text-sm text-stone-400">Open <strong>Event Viewer</strong> > Applications and Services > Microsoft > Windows > Sysmon > Operational. Look for <strong>Event ID 1</strong> (Process Create).</p>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <footer class="bg-white border-t border-stone-200 py-8 text-center mt-auto">
+        <p class="text-stone-500 text-sm">&copy; 2025 d-osei Portfolio. Lab Documentation.</p>
+    </footer>
+
+</body>
+</html>

@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lab Infrastructure: Dell AIO Cyber Range</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&family=JetBrains+Mono:wght@400&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; background-color: #FAFAF9; color: #1C1917; }
+        code { font-family: 'JetBrains Mono', monospace; }
+        .code-block { background-color: #1E293B; color: #E2E8F0; padding: 1rem; border-radius: 0.5rem; overflow-x: auto; font-size: 0.875rem; margin-top: 0.5rem; margin-bottom: 0.5rem; border-left: 4px solid #0EA5E9; }
+        .section-header { border-bottom: 2px solid #E5E7EB; padding-bottom: 0.5rem; margin-bottom: 1.5rem; }
+    </style>
+</head>
+<body class="antialiased min-h-screen flex flex-col">
+
+    <header class="bg-white border-b border-stone-200 sticky top-0 z-50 shadow-sm">
+        <div class="max-w-5xl mx-auto px-4 h-16 flex items-center justify-between">
+            <div class="flex items-center gap-2">
+                <span class="text-2xl">🖥️</span>
+                <a href="index.html" class="text-xl font-bold text-stone-800 hover:text-sky-600 transition">d-osei Portfolio</a>
+            </div>
+            <nav class="flex space-x-6 text-sm font-medium text-stone-600">
+                <a href="index.html" class="hover:text-sky-600 transition">Home</a>
+                <a href="tier1.html" class="hover:text-sky-600 transition">Tier-1</a>
+                <a href="tier2.html" class="hover:text-sky-600 transition">Tier-2</a>
+            </nav>
+        </div>
+    </header>
+
+    <main class="flex-grow max-w-5xl mx-auto px-4 py-12 w-full">
+
+        <div class="mb-12">
+            <div class="flex items-center gap-3 mb-4">
+                <span class="bg-sky-100 text-sky-800 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wide">Systems Architect</span>
+                <span class="bg-green-100 text-green-800 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wide">Project Status: Active</span>
+            </div>
+            <h1 class="text-4xl md:text-5xl font-extrabold text-stone-900 mb-6">Lab Infrastructure: The Dell AIO Cyber Range</h1>
+            <p class="text-xl text-stone-600 leading-relaxed">
+                This project documents the design, setup, and configuration of a dedicated, isolated cybersecurity lab built around a repurposed Dell OptiPlex All-in-One (AIO) server and a MacBook Pro management station. 
+            </p>
+        </div>
+
+        <section class="mb-16 bg-white p-8 rounded-2xl shadow-sm border border-stone-200">
+            <h2 class="text-2xl font-bold text-stone-800 mb-4 section-header">1. Lab Topology and Architecture</h2>
+            <p class="text-stone-700 mb-6">
+                The lab follows a client-server model, utilizing a Type-1 hypervisor on the server (Dell AIO) and a Type-2 hypervisor on the management station (MacBook Pro). 
+            </p>
+            
+            <figure class="mb-8 border border-stone-200 rounded-lg overflow-hidden bg-stone-50">
+                <img src="images/topology.png" alt="Lab Topology Diagram" class="w-full h-auto object-cover">
+                <figcaption class="p-3 text-center text-sm text-stone-500 bg-stone-100 border-t border-stone-200">
+                    Figure 1: High-level Network Topology 
+                </figcaption>
+            </figure>
+        </section>
+
+        <section class="mb-16">
+            <h2 class="text-2xl font-bold text-stone-800 mb-6 section-header">2. Tools and Hardware</h2>
+            <div class="overflow-x-auto">
+                <table class="min-w-full bg-white border border-stone-200 rounded-lg overflow-hidden shadow-sm">
+                    <thead class="bg-stone-100 text-stone-700">
+                        <tr>
+                            <th class="py-3 px-4 text-left font-semibold border-b">Category</th>
+                            <th class="py-3 px-4 text-left font-semibold border-b">Component</th>
+                            <th class="py-3 px-4 text-left font-semibold border-b">Specification</th>
+                            <th class="py-3 px-4 text-left font-semibold border-b">Role</th>
+                        </tr>
+                    </thead>
+                    <tbody class="text-sm">
+                        <tr class="border-b hover:bg-stone-50">
+                            <td class="py-3 px-4">Server</td>
+                            <td class="py-3 px-4 font-medium">Dell OptiPlex 7440 AIO</td>
+                            <td class="py-3 px-4">i5-6500, 32GB RAM</td>
+                            <td class="py-3 px-4">Dedicated VM Host (Type 1 Hypervisor)</td>
+                        </tr>
+                        <tr class="border-b hover:bg-stone-50">
+                            <td class="py-3 px-4">Storage</td>
+                            <td class="py-3 px-4 font-medium">External SSD</td>
+                            <td class="py-3 px-4">2TB SATA III</td>
+                            <td class="py-3 px-4">Main VM Datastore</td>
+                        </tr>
+                        <tr class="border-b hover:bg-stone-50">
+                            <td class="py-3 px-4">Network</td>
+                            <td class="py-3 px-4 font-medium">TP-Link UE306</td>
+                            <td class="py-3 px-4">USB 3.0 Gigabit</td>
+                            <td class="py-3 px-4">Physical Uplink</td>
+                        </tr>
+                        <tr class="border-b hover:bg-stone-50">
+                            <td class="py-3 px-4">Mgmt</td>
+                            <td class="py-3 px-4 font-medium">MacBook Pro</td>
+                            <td class="py-3 px-4">M2, macOS</td>
+                            <td class="py-3 px-4">Management Console (SSH/Web)</td>
+                        </tr>
+                        <tr class="hover:bg-stone-50">
+                            <td class="py-3 px-4">Hypervisor</td>
+                            <td class="py-3 px-4 font-medium">VMware ESXi</td>
+                            <td class="py-3 px-4">Version 8.0</td>
+                            <td class="py-3 px-4">Core Virtualization</td>
+                        </tr>
+                    </tbody>
+                </table>
+                <p class="mt-2 text-xs text-stone-400 text-right"></p>
+            </div>
+        </section>
+
+        <section class="mb-16">
+            <h2 class="text-2xl font-bold text-stone-800 mb-6 section-header">3. Installation and Configuration Process</h2>
+
+            <div class="mb-10">
+                <h3 class="text-xl font-bold text-red-600 mb-3">3.1 The Challenge: Creating the Installer</h3>
+                <p class="text-stone-700 mb-4">
+                    The installation of the ESXi hypervisor presented a key technical challenge. [cite_start]Standard graphical tools failed to create a bootable drive for this specific hardware configuration (Dell OptiPlex 7440). [cite: 44, 45, 46]
+                </p>
+                <div class="flex flex-col md:flex-row gap-6">
+                    <div class="flex-1">
+                        <p class="text-stone-700 mb-2">
+                            <strong>The Failure:</strong> I initially attempted to use <code>balenaEtcher</code> to flash the ISO. [cite_start]However, it failed to create a partition table that the Dell BIOS could recognize. [cite: 47, 48]
+                        </p>
+                        <ul class="list-disc list-inside text-stone-600 ml-2">
+                            <li>Missing partition table warning.</li>
+                            <li>Drive unrecognized by BIOS legacy boot mode.</li>
+                        </ul>
+                    </div>
+                    <div class="flex-1">
+                         <img src="images/etcher-error.png" alt="BalenaEtcher Warning" class="rounded shadow border border-stone-200 w-full">
+                        <p class="text-xs text-stone-500 mt-1">Figure 1: Missing partition table error </p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="mb-10">
+                <h3 class="text-xl font-bold text-green-700 mb-3">3.2 The Solution: Native Terminal Formatting</h3>
+                <p class="text-stone-700 mb-4">
+                    [cite_start]To resolve this, I bypassed GUI tools and utilized macOS native terminal utilities to manually structure the drive with an MBR (Master Boot Record) partition map and FAT32 file system. [cite: 102, 103]
+                </p>
+
+                <div class="space-y-6">
+                    <div class="bg-white p-5 rounded-lg border border-stone-200">
+                        <h4 class="font-bold text-stone-800 mb-2">Step 1: Formatting and Partitioning</h4>
+                        <div class="code-block">
+diskutil eraseDisk MS-DOS "ESXI" MBR disk4
+                        </div>
+                        <p class="text-sm text-stone-600 mt-2">This command reformats the disk with the required MBR scheme.</p>
+                    </div>
+
+                    <div class="bg-white p-5 rounded-lg border border-stone-200">
+                        <h4 class="font-bold text-stone-800 mb-2">Step 2: Marking Partition as Active</h4>
+                        <p class="text-sm text-stone-600 mb-2">Using <code>fdisk</code> was critical to flag the partition as bootable for the legacy BIOS.</p>
+                        <div class="code-block">
+sudo fdisk -e /dev/disk4
+> f 1      # Flag partition 1 as active
+> write    # Write changes to table
+> quit
+                        </div>
+                    </div>
+
+                    <div class="bg-white p-5 rounded-lg border border-stone-200">
+                        <h4 class="font-bold text-stone-800 mb-2">Step 3: Mounting and Copying Files</h4>
+                        <div class="code-block">
+hdiutil attach VMware-VMvisor-Installer-8.0U3e.iso
+cp -Rv /Volumes/ESXI-INSTALLER/* /Volumes/ESXI/
+                        </div>
+                        <p class="text-sm text-stone-600 mt-2">Manually copying the installer contents to the newly prepared bootable USB.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="mb-10">
+                <h3 class="text-xl font-bold text-stone-800 mb-3">3.3 Boot Configuration Edit</h3>
+                <p class="text-stone-700 mb-4">
+                    To ensure the bootloader could locate the kernel, I edited the <code>isolinux.cfg</code> file, modifying the APPEND line to include <code>-p 1</code>. [cite_start]This prevents "Bank not found" errors. [cite: 143, 163]
+                </p>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 items-center">
+                    <div class="code-block h-full flex items-center">
+LABEL install
+  KERNEL mboot.c32
+  APPEND -c boot.cfg -p 1
+                    </div>
+                    <div>
+                         <img src="images/boot-config.png" alt="Nano Editor Config" class="rounded shadow border border-stone-200 w-full">
+                        <p class="text-xs text-stone-500 mt-1">Figure 3: Appending the partition flag </p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="mb-10">
+                <h3 class="text-xl font-bold text-stone-800 mb-3">3.4 Post-Install Configuration (DCUI)</h3>
+                <p class="text-stone-700 mb-4">
+                    Once installed, I accessed the Direct Console User Interface (DCUI) to configure the management network. I disabled DHCP and assigned a static IP (10.0.0.10) to ensure reliable remote management. 
+                </p>
+                 <img src="images/dcui-network.png" alt="DCUI Configuration" class="rounded shadow border border-stone-200 w-full max-w-2xl mx-auto">
+                <p class="text-xs text-stone-500 mt-1 text-center">Figure 5 & 6: Static IP Assignment </p>
+            </div>
+        </section>
+
+        <section class="mb-16 bg-stone-900 text-white p-8 rounded-2xl shadow-lg">
+            <h2 class="text-2xl font-bold text-white mb-6 section-header border-stone-700">4. Final Status and Conclusion</h2>
+            <p class="text-stone-300 mb-6">
+                The Dell AIO is now fully operational as a "headless" hypervisor. Verification is confirmed via the VMware ESXi Host Client running on the MacBook Pro. 
+            </p>
+            
+            <div class="rounded-lg overflow-hidden border border-stone-700 shadow-2xl mb-6">
+                <img src="images/final-dashboard.png" alt="ESXi Host Client" class="w-full h-auto">
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-center">
+                <div class="bg-stone-800 p-4 rounded-lg">
+                    <span class="block text-2xl">✅</span>
+                    <span class="text-sm font-bold text-stone-400">Remote Access</span>
+                    <span class="block text-xs text-green-400">10.0.0.10</span>
+                </div>
+                <div class="bg-stone-800 p-4 rounded-lg">
+                    <span class="block text-2xl">💾</span>
+                    <span class="text-sm font-bold text-stone-400">Storage</span>
+                    <span class="block text-xs text-green-400">2TB SSD Mounted</span>
+                </div>
+                <div class="bg-stone-800 p-4 rounded-lg">
+                    <span class="block text-2xl">🚀</span>
+                    <span class="text-sm font-bold text-stone-400">Status</span>
+                    <span class="block text-xs text-green-400">Ready for VMs</span>
+                </div>
+            </div>
+        </section>
+
+        <section class="mb-12">
+            <h2 class="text-xl font-bold text-stone-800 mb-4">Next Steps: Phase 2</h2>
+            <ul class="list-disc list-inside text-stone-600 mb-8 ml-2">
+                <li>Security Onion: Deploying the NSM sensor.</li>
+                <li>Kali Linux: Configuring the attack box.</li>
+                <li>Attack Simulation: Running the first "live fire" exercise.</li>
+            </ul>
+
+            <a href="build_notes.html" class="block group">
+                <div class="bg-white border-l-4 border-sky-500 p-6 rounded-r-lg shadow-sm hover:shadow-md transition duration-300 border-t border-b border-r border-stone-200">
+                    <div class="flex justify-between items-center">
+                        <div>
+                            <h3 class="text-lg font-bold text-stone-900 group-hover:text-sky-600 transition">📂 View Phase 2: VM Build Notes</h3>
+                            <p class="text-stone-600 mt-1">Documentation on how I deployed Security Onion, Kali, and Windows Targets on top of this infrastructure.</p>
+                        </div>
+                        <div class="text-3xl text-stone-300 group-hover:text-sky-500 transition">→</div>
+                    </div>
+                </div>
+            </a>
+        </section>
+
+    </main>
+
+    <footer class="bg-stone-900 text-stone-400 py-8 text-center mt-auto">
+        <p>&copy; 2025 d-osei Portfolio. Systems Architecture & SOC Operations.</p>
+    </footer>
+
+</body>
+</html>

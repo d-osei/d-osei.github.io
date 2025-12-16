@@ -69,27 +69,9 @@
             display: none;
         }
     </style>
-    <!-- Chosen Palette: Warm Neutrals & Terracotta -->
-    <!-- Application Structure Plan: 
-         1. Hero Section: Sets the context for the SOC Analyst role.
-         2. Dashboard Overview: High-level visual summary of the incident landscape (mock data context).
-         3. Playbook Commander: The core interactive module. 
-            - Sidebar/Top Nav for selecting the 6 scenarios.
-            - Main View: Dynamic content area updating based on selection.
-            - Sections: Scenario Header, Process Flow (Interactive Accordion), Tools & Analysis (Radar Chart), Escalation Protocol (Cards).
-         This structure transforms the linear document into a "Console" feel, allowing analysts to jump to the relevant playbook during a crisis rather than scrolling a PDF.
-    -->
-    <!-- Visualization & Content Choices:
-         1. "Incident Type Distribution" (Donut Chart): Goal: Context. Shows prevalence of different attacks.
-         2. "Risk Profile" (Radar Chart): Goal: Relationships. For each playbook, visualize the "Severity", "Complexity", "Urgency", "Data Risk", "Public Impact". Helps analyst gauge response intensity.
-         3. "Response Workflow" (Interactive HTML Timeline): Goal: Change/Process. Replaces text lists with clickable steps to track progress. No SVG.
-         4. "Escalation Matrix" (Styled Cards): Goal: Decision Support. Clear criteria for handing off to Tier-2.
-         CONFIRMATION: NO SVG graphics used. NO Mermaid JS used.
-    -->
 </head>
 <body class="antialiased min-h-screen flex flex-col">
 
-    <!-- Header -->
     <header class="bg-white border-b border-stone-200 sticky top-0 z-50 shadow-sm">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
             <div class="flex items-center gap-2">
@@ -97,6 +79,8 @@
                 <h1 class="text-xl font-bold tracking-tight text-stone-800">SOC <span class="text-orange-600">Tier-1</span> Response Console</h1>
             </div>
             <nav class="hidden md:flex space-x-8 text-sm font-medium text-stone-600">
+                <a href="index.html" class="hover:text-orange-600 transition font-bold">Home</a>
+                <a href="tier2.html" class="hover:text-orange-600 transition font-bold">Tier-2 Console</a>
                 <a href="#dashboard" class="hover:text-orange-600 transition">Dashboard</a>
                 <a href="#playbooks" class="hover:text-orange-600 transition">Playbooks</a>
                 <a href="#tools" class="hover:text-orange-600 transition">Toolkit</a>
@@ -105,7 +89,6 @@
     </header>
 
     <main class="flex-grow">
-        <!-- Hero / Intro -->
         <section class="bg-stone-50 py-12 border-b border-stone-200">
             <div class="max-w-4xl mx-auto px-4 text-center">
                 <h2 class="text-3xl font-bold text-stone-900 mb-4">Operational Guidelines for Frontline Defense</h2>
@@ -116,7 +99,6 @@
             </div>
         </section>
 
-        <!-- Dashboard Section (Contextual Data) -->
         <section id="dashboard" class="max-w-7xl mx-auto px-4 py-12">
             <div class="mb-8">
                 <h3 class="text-2xl font-bold text-stone-900">Incident Landscape Overview</h3>
@@ -124,7 +106,6 @@
             </div>
             
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                <!-- Chart 1: Incident Frequency -->
                 <div class="bg-white p-6 rounded-xl shadow-sm border border-stone-100">
                     <h4 class="font-semibold text-stone-700 mb-4 text-center">Common Incident Types</h4>
                     <div class="chart-container">
@@ -133,7 +114,6 @@
                     <p class="text-xs text-center text-stone-400 mt-2">Phishing remains the primary vector.</p>
                 </div>
 
-                <!-- Chart 2: Triage Stages -->
                 <div class="bg-white p-6 rounded-xl shadow-sm border border-stone-100">
                     <h4 class="font-semibold text-stone-700 mb-4 text-center">Avg. Time per Phase (min)</h4>
                     <div class="chart-container">
@@ -142,7 +122,6 @@
                     <p class="text-xs text-center text-stone-400 mt-2">Analysis requires the most dedicated time.</p>
                 </div>
 
-                <!-- Key Metrics Cards -->
                 <div class="grid grid-rows-3 gap-4">
                     <div class="bg-orange-50 border-l-4 border-orange-500 p-4 rounded-r-lg flex flex-col justify-center">
                         <span class="text-sm text-orange-800 font-medium">Active Threat Level</span>
@@ -160,24 +139,19 @@
             </div>
         </section>
 
-        <!-- Playbook Interaction Section -->
         <section id="playbooks" class="bg-white py-12 border-t border-stone-200">
             <div class="max-w-7xl mx-auto px-4">
                 <div class="flex flex-col lg:flex-row gap-8">
                     
-                    <!-- Sidebar Navigation -->
                     <aside class="w-full lg:w-1/4 flex-shrink-0">
                         <h3 class="text-lg font-bold text-stone-900 mb-4 px-2">Select Playbook</h3>
                         <div class="space-y-2" id="playbookNav">
-                            <!-- Nav items generated by JS -->
-                        </div>
+                            </div>
                     </aside>
 
-                    <!-- Main Playbook Content -->
                     <div class="flex-grow bg-stone-50 rounded-2xl border border-stone-200 p-6 lg:p-10 shadow-inner relative min-h-[600px]">
                         
                         <div id="playbookContent" class="fade-in">
-                            <!-- Content injected by JS -->
                             <div class="flex flex-col items-center justify-center h-full text-stone-400 py-20">
                                 <span class="text-4xl mb-4">👆</span>
                                 <p>Select an incident type from the menu to initiate the response protocol.</p>
@@ -189,7 +163,6 @@
             </div>
         </section>
 
-        <!-- Tooling Reference -->
         <section id="tools" class="max-w-7xl mx-auto px-4 py-16">
             <h3 class="text-2xl font-bold text-stone-900 mb-8">Integrated Tooling Ecosystem</h3>
             <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
@@ -234,7 +207,6 @@
         </div>
     </footer>
 
-    <!-- JavaScript Logic -->
     <script>
         // --- DATA STORE ---
         // Based on the provided source report
@@ -587,10 +559,8 @@
             // Build HTML
             const html = `
                 <div class="flex flex-col xl:flex-row gap-8 fade-in">
-                    <!-- Left Column: Guide -->
                     <div class="xl:w-2/3 space-y-8">
                         
-                        <!-- Header -->
                         <div>
                             <div class="flex items-center gap-3 mb-2">
                                 <span class="text-4xl shadow-sm bg-white p-2 rounded-lg border border-stone-100">${pb.icon}</span>
@@ -608,7 +578,6 @@
                             </div>
                         </div>
 
-                        <!-- Interactive Process Flow -->
                         <div>
                             <h3 class="text-xl font-bold text-stone-800 mb-6 flex items-center gap-2">
                                 <span>⚡</span> Triage Protocol
@@ -616,15 +585,12 @@
                             <div class="relative space-y-0">
                                 ${pb.steps.map((step, i) => `
                                     <div class="relative pl-10 pb-8 ${i === pb.steps.length - 1 ? 'last-step' : ''}">
-                                        <!-- Line -->
                                         <div class="timeline-line"></div>
                                         
-                                        <!-- Node -->
                                         <div class="absolute left-0 top-0 w-10 h-10 bg-white border-2 border-stone-300 rounded-full flex items-center justify-center font-bold text-stone-500 shadow-sm z-10 hover:border-orange-500 hover:text-orange-500 transition cursor-default">
                                             ${i + 1}
                                         </div>
 
-                                        <!-- Content -->
                                         <div class="bg-white rounded-lg border border-stone-200 p-5 shadow-sm hover:shadow-md transition">
                                             <h4 class="font-bold text-lg text-stone-800 mb-3">${step.phase}</h4>
                                             <ul class="space-y-2">
@@ -645,10 +611,8 @@
 
                     </div>
 
-                    <!-- Right Column: Analysis & Escalation -->
                     <div class="xl:w-1/3 space-y-8">
                         
-                        <!-- Risk Profile Chart -->
                         <div class="bg-white p-6 rounded-xl shadow-sm border border-stone-200">
                             <h4 class="font-bold text-stone-800 mb-4 text-center">Incident Risk Profile</h4>
                             <div class="chart-container" style="height: 250px;">
@@ -657,7 +621,6 @@
                             <p class="text-center text-xs text-stone-400 mt-2">Relative intensity metrics</p>
                         </div>
 
-                        <!-- Escalation Criteria -->
                         <div class="bg-red-50 border border-red-100 rounded-xl p-6">
                             <h4 class="font-bold text-red-800 mb-4 flex items-center gap-2">
                                 <span>🚨</span> Escalation Triggers
@@ -678,8 +641,7 @@
                             </div>
                         </div>
 
-                        <!-- Quick Tools Actions -->
-                         <div class="bg-stone-100 rounded-xl p-6 border border-stone-200">
+                        <div class="bg-stone-100 rounded-xl p-6 border border-stone-200">
                              <h4 class="font-bold text-stone-700 mb-3">Relevant Tools</h4>
                              <div class="flex flex-wrap gap-2">
                                  <span class="px-3 py-1 bg-white border border-stone-300 rounded text-xs font-semibold text-stone-600">Ticketing</span>

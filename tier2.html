@@ -1,0 +1,536 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SOC Tier-2 Advanced Response Guide</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        /* Custom Font Import */
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap');
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #FAFAF9; /* Warm neutral background */
+            color: #1C1917; /* Stone 900 */
+        }
+
+        .chart-container {
+            position: relative;
+            width: 100%;
+            height: 300px;
+            max-width: 600px;
+            max-height: 400px;
+            margin: 0 auto;
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #F5F5F4; } 
+        ::-webkit-scrollbar-thumb { background: #D6D3D1; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #A8A29E; }
+
+        /* Transitions */
+        .fade-in { animation: fadeIn 0.5s ease-in-out; }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .nav-item.active {
+            background-color: #E7E5E4; /* Stone 200 */
+            border-left: 4px solid #14B8A6; /* Teal 500 (Tier-2 Primary Color) */
+            font-weight: 600;
+        }
+
+        /* Timeline Connector Lines */
+        .timeline-line {
+            position: absolute;
+            left: 1.25rem; 
+            top: 2.5rem;
+            bottom: 0;
+            width: 2px;
+            background-color: #E5E7EB;
+            z-index: 0;
+        }
+        .last-step .timeline-line { display: none; }
+
+        /* Tier-2 Specific Styles */
+        .tier2-bg-color { background-color: #0D9488; } /* Teal 600 */
+    </style>
+</head>
+<body class="antialiased min-h-screen flex flex-col">
+
+    <header class="bg-white border-b border-stone-200 sticky top-0 z-50 shadow-sm">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+            <div class="flex items-center gap-2">
+                <span class="text-2xl">🔬</span>
+                <h1 class="text-xl font-bold tracking-tight text-stone-800">SOC <span class="text-teal-600">Tier-2</span> Analysis Console</h1>
+            </div>
+            <nav class="hidden md:flex space-x-8 text-sm font-medium text-stone-600">
+                <a href="index.html" class="hover:text-stone-600 transition">Go to Index</a>
+                <a href="#playbooks" class="hover:text-teal-600 transition">Playbooks</a>
+                <a href="#analysis" class="hover:text-teal-600 transition">Deep Analysis</a>
+            </nav>
+        </div>
+    </header>
+
+    <main class="flex-grow">
+        <section class="bg-teal-50 py-12 border-b border-teal-200">
+            <div class="max-w-4xl mx-auto px-4 text-center">
+                <h2 class="text-3xl font-bold text-stone-900 mb-4">Advanced Analysis and Remediation Procedures</h2>
+                <p class="text-lg text-stone-600 leading-relaxed">
+                    This console contains the protocols for escalated, high-severity incidents requiring deep forensic analysis, complex containment, and coordination with engineering teams.
+                </p>
+            </div>
+        </section>
+
+        <section id="playbooks" class="bg-white py-12 border-t border-stone-200">
+            <div class="max-w-7xl mx-auto px-4">
+                <div class="flex flex-col lg:flex-row gap-8">
+                    
+                    <aside class="w-full lg:w-1/4 flex-shrink-0">
+                        <h3 class="text-lg font-bold text-stone-900 mb-4 px-2">Select Advanced Playbook</h3>
+                        <div class="space-y-2" id="playbookNav">
+                            </div>
+                        <div class="mt-6 p-4 bg-stone-100 rounded-lg text-sm text-stone-600 border border-stone-200">
+                             <p class="font-bold mb-1">🔍 Tier-1 Reference:</p>
+                             <a href="tier1.html" class="text-xs text-teal-600 hover:text-teal-800 underline">View Tier-1 Triage Console</a>
+                        </div>
+                    </aside>
+
+                    <div class="flex-grow bg-stone-50 rounded-2xl border border-stone-200 p-6 lg:p-10 shadow-inner relative min-h-[600px]">
+                        
+                        <div id="playbookContent" class="fade-in">
+                            <div class="flex flex-col items-center justify-center h-full text-stone-400 py-20">
+                                <span class="text-4xl mb-4">🔭</span>
+                                <p>Select an escalated incident type from the menu to begin deep analysis and remediation.</p>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        </section>
+        
+        <section id="analysis" class="max-w-7xl mx-auto px-4 py-16">
+            <h3 class="text-2xl font-bold text-stone-900 mb-8">Tier-2 Advanced Tooling Suite</h3>
+            <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+                <div class="p-4 bg-white rounded-lg shadow-sm border border-stone-200 text-center hover:shadow-md transition">
+                    <div class="text-2xl mb-2">💾</div>
+                    <div class="font-bold text-stone-700">Forensics Tool</div>
+                    <div class="text-xs text-stone-500">FTK / EnCase</div>
+                </div>
+                <div class="p-4 bg-white rounded-lg shadow-sm border border-stone-200 text-center hover:shadow-md transition">
+                    <div class="text-2xl mb-2">⚙️</div>
+                    <div class="font-bold text-stone-700">Automation (SOAR)</div>
+                    <div class="text-xs text-stone-500">Phantom / Splunk SOAR</div>
+                </div>
+                <div class="p-4 bg-white rounded-lg shadow-sm border border-stone-200 text-center hover:shadow-md transition">
+                    <div class="text-2xl mb-2">🧠</div>
+                    <div class="font-bold text-stone-700">Static/Dynamic Analysis</div>
+                    <div class="text-xs text-stone-500">IDA Pro / Ghidra</div>
+                </div>
+                <div class="p-4 bg-white rounded-lg shadow-sm border border-stone-200 text-center hover:shadow-md transition">
+                    <div class="text-2xl mb-2">☁️</div>
+                    <div class="font-bold text-stone-700">Cloud Console</div>
+                    <div class="text-xs text-stone-500">AWS / Azure Logs</div>
+                </div>
+                <div class="p-4 bg-white rounded-lg shadow-sm border border-stone-200 text-center hover:shadow-md transition">
+                    <div class="text-2xl mb-2">🌐</div>
+                    <div class="font-bold text-stone-700">Packet Capture</div>
+                    <div class="text-xs text-stone-500">Wireshark / NetFlow</div>
+                </div>
+                <div class="p-4 bg-white rounded-lg shadow-sm border border-stone-200 text-center hover:shadow-md transition">
+                    <div class="text-2xl mb-2">📰</div>
+                    <div class="font-bold text-stone-700">Intelligence Feeds</div>
+                    <div class="text-xs text-stone-500">Commercial TI Platforms</div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer class="bg-stone-900 text-stone-400 py-8">
+        <div class="max-w-7xl mx-auto px-4 text-center">
+            <p>&copy; 2023 SOC Operations. Based on Advanced Tier-2 Incident Response Playbooks.</p>
+            <p class="text-xs mt-2">Confidential - Internal Use Only</p>
+        </div>
+    </footer>
+
+    <script>
+        // --- DATA STORE (Tier-2 Focus) ---
+        const playbooks = [
+            {
+                id: "ransomware",
+                title: "Active Ransomware Infection",
+                icon: "💰",
+                scenario: "Multiple endpoints or servers report encryption, or a ransom note is found. Tier-1 containment failed.",
+                type: "High-Severity Ransomware / Extortion",
+                triggers: ["Tier-1 Escalation", "Mass File Encryption", "Decryption Demand"],
+                riskProfile: [9, 10, 10, 10, 9], // [Likelihood, Complexity, Urgency, Data Risk, User Impact]
+                steps: [
+                    {
+                        phase: "Immediate Isolation & Backup Check",
+                        actions: [
+                            "Confirm all affected and surrounding systems are **network isolated**.",
+                            "Notify leadership and core IR team (CRISIS LEVEL).",
+                            "Initiate forensic snapshot of 2-3 affected endpoints (memory + disk).",
+                            "Verify recent, offline, immutable backup status."
+                        ]
+                    },
+                    {
+                        phase: "Root Cause & TTP Analysis",
+                        actions: [
+                            "Identify initial access vector (Phishing? Vulnerability?).",
+                            "Analyze samples in sandbox; determine encryption type/family.",
+                            "Identify C2 IP/Domains and block them globally.",
+                            "Search network logs for lateral movement (WMI, RDP, SMB) and privilege escalation."
+                        ]
+                    },
+                    {
+                        phase: "Eradication & Hardening",
+                        actions: [
+                            "Disable/Delete compromised accounts/credentials.",
+                            "Apply emergency patches for identified vulnerabilities.",
+                            "Rebuild affected systems from a clean state or trusted backup source."
+                        ]
+                    },
+                    {
+                        phase: "Post-Incident & Reporting",
+                        actions: [
+                            "Conduct detailed timeline reconstruction (who, what, when).",
+                            "Prepare executive summary for leadership.",
+                            "Document all IOCs and update preventative defenses (EDR, Firewall)."
+                        ]
+                    }
+                ],
+                escalation: [
+                    "Confirmed breach of PII/Regulated Data (Legal/Privacy Notification).",
+                    "Critical infrastructure compromise.",
+                    "Negotiation/Payment required (Executive/Legal decision).",
+                    "Infection spread across multiple network segments."
+                ]
+            },
+            {
+                id: "insider",
+                title: "Insider Threat (Malicious/Accidental)",
+                icon: "👤",
+                scenario: "Detection of extreme data access or suspicious data exfiltration by an authorized internal user.",
+                type: "Access Abuse / Data Theft",
+                triggers: ["DLP Alert on Sensitive Data", "HR/Legal Request", "Unusual User Activity"],
+                riskProfile: [7, 8, 9, 10, 7],
+                steps: [
+                    {
+                        phase: "Preservation & Notification",
+                        actions: [
+                            "Quietly suspend or disable user access (minimize alert).",
+                            "Notify HR and Legal teams immediately.",
+                            "Preserve all data (hard drive, email, cloud storage) for the target user (legal hold)."
+                        ]
+                    },
+                    {
+                        phase: "Activity Profiling & Forensics",
+                        actions: [
+                            "Review 90 days of user activity (login times, file server logs, print activity).",
+                            "Analyze web proxy and email logs for data staging/transfer (Dropbox, personal email).",
+                            "Perform host forensics on the user's primary workstation for artifacts."
+                        ]
+                    },
+                    {
+                        phase: "Containment & Remediation",
+                        actions: [
+                            "Identify and secure all sensitive data touched by the user.",
+                            "Revoke/Reset credentials for any systems accessed.",
+                            "Interview user (coordinated with HR/Legal)."
+                        ]
+                    },
+                    {
+                        phase: "Documentation & Process Update",
+                        actions: [
+                            "Create detailed report for Legal and HR, including data classification and regulatory impact.",
+                            "Update DLP rules and data governance policies based on findings."
+                        ]
+                    }
+                ],
+                escalation: [
+                    "Legal team mandates full investigation.",
+                    "Direct evidence of PII/IP exfiltration.",
+                    "User refusal to cooperate/destruction of evidence.",
+                    "Threat to physical assets."
+                ]
+            },
+            {
+                id: "postbreach",
+                title: "Post-Compromise Activity",
+                icon: "👻",
+                scenario: "Finding persistence mechanisms (webshells, backdoors) or lateral movement after an initial breach was contained by Tier-1.",
+                type: "Persistence / Advanced Threat",
+                triggers: ["Tier-1 Containment Failure", "Threat Hunt Alert (IOC Hit)", "Network Anomaly"],
+                riskProfile: [8, 9, 8, 8, 8],
+                steps: [
+                    {
+                        phase: "Validation & Threat Hunting",
+                        actions: [
+                            "Confirm IOCs from Tier-1 were fully blocked; check for variants.",
+                            "Run deep forensic scripts across key systems (find common adversary tools).",
+                            "Analyze network baseline for persistent C2 beaconing or unusual internal scans."
+                        ]
+                    },
+                    {
+                        phase: "Attacker Timeline Mapping",
+                        actions: [
+                            "Build a precise timeline: Initial Access -> Discovery -> Lateral Movement -> Actions on Objective.",
+                            "Map findings to the MITRE ATT&CK Framework.",
+                            "Identify all user accounts and hosts touched by the attacker."
+                        ]
+                    },
+                    {
+                        phase: "Systemic Eradication",
+                        actions: [
+                            "Initiate 'Big Bang' remediation: Simultaneous password reset for all compromised accounts.",
+                            "Remove ALL persistence mechanisms (registry, scheduled tasks, web shells).",
+                            "Patch and harden the root cause system (i.e., the exploited web server)."
+                        ]
+                    },
+                    {
+                        phase: "Validation & Review",
+                        actions: [
+                            "Run a final, comprehensive threat sweep.",
+                            "Prepare detailed vulnerability report for App/Infra team.",
+                            "Transition to long-term monitoring/threat hunting phase."
+                        ]
+                    }
+                ],
+                escalation: [
+                    "Discovery of multiple, redundant backdoors.",
+                    "Compromise of Domain Controller or Identity Management System.",
+                    "Failure to locate the root cause.",
+                    "Ongoing activity/live presence detected."
+                ]
+            }
+        ];
+
+        // --- APP STATE ---
+        let currentPlaybookIndex = 0;
+        let radarChartInstance = null;
+
+        // --- DOM ELEMENTS ---
+        const navContainer = document.getElementById('playbookNav');
+        const contentContainer = document.getElementById('playbookContent');
+
+        // --- INITIALIZATION ---
+        document.addEventListener('DOMContentLoaded', () => {
+            renderNavigation();
+            loadPlaybook(0); // Load first by default
+        });
+
+        // --- FUNCTIONS ---
+
+        function renderNavigation() {
+            navContainer.innerHTML = '';
+            playbooks.forEach((pb, index) => {
+                const btn = document.createElement('button');
+                btn.className = `nav-item w-full text-left px-4 py-3 rounded-lg flex items-center gap-3 hover:bg-stone-100 transition duration-200 border-l-4 border-transparent ${index === currentPlaybookIndex ? 'active' : ''}`;
+                btn.innerHTML = `
+                    <span class="text-xl">${pb.icon}</span>
+                    <div>
+                        <div class="font-semibold text-stone-800 text-sm">${pb.title}</div>
+                        <div class="text-xs text-stone-500 truncate w-40">${pb.type}</div>
+                    </div>
+                `;
+                btn.onclick = () => {
+                    currentPlaybookIndex = index;
+                    renderNavigation(); // Refresh active state
+                    loadPlaybook(index);
+                };
+                navContainer.appendChild(btn);
+            });
+        }
+
+        function loadPlaybook(index) {
+            const pb = playbooks[index];
+            
+            // Build HTML
+            const html = `
+                <div class="flex flex-col xl:flex-row gap-8 fade-in">
+                    <div class="xl:w-2/3 space-y-8">
+                        
+                        <div>
+                            <div class="flex items-center gap-3 mb-2">
+                                <span class="text-4xl shadow-sm bg-white p-2 rounded-lg border border-stone-100">${pb.icon}</span>
+                                <h2 class="text-3xl font-bold text-stone-900">${pb.title}</h2>
+                            </div>
+                            <div class="inline-block bg-teal-100 text-teal-800 px-3 py-1 rounded-full text-sm font-semibold mb-4">
+                                ${pb.type}
+                            </div>
+                            <p class="text-stone-600 bg-white p-4 rounded-lg border border-stone-200 shadow-sm">
+                                <strong>Scenario:</strong> ${pb.scenario}
+                            </p>
+                            <div class="mt-4 flex flex-wrap gap-2">
+                                <span class="text-xs font-bold text-stone-500 uppercase tracking-wide">Triggers:</span>
+                                ${pb.triggers.map(t => `<span class="bg-stone-200 text-stone-700 px-2 py-0.5 rounded text-xs">${t}</span>`).join('')}
+                            </div>
+                        </div>
+
+                        <div>
+                            <h3 class="text-xl font-bold text-stone-800 mb-6 flex items-center gap-2">
+                                <span>🔬</span> Deep Analysis & Remediation Flow
+                            </h3>
+                            <div class="relative space-y-0">
+                                ${pb.steps.map((step, i) => `
+                                    <div class="relative pl-10 pb-8 ${i === pb.steps.length - 1 ? 'last-step' : ''}">
+                                        <div class="timeline-line"></div>
+                                        
+                                        <div class="absolute left-0 top-0 w-10 h-10 bg-white border-2 border-teal-300 rounded-full flex items-center justify-center font-bold text-teal-600 shadow-sm z-10 hover:border-teal-500 hover:text-teal-700 transition cursor-default">
+                                            ${i + 1}
+                                        </div>
+
+                                        <div class="bg-white rounded-lg border border-stone-200 p-5 shadow-sm hover:shadow-md transition">
+                                            <h4 class="font-bold text-lg text-stone-800 mb-3">${step.phase}</h4>
+                                            <ul class="space-y-2">
+                                                ${step.actions.map(action => `
+                                                    <li class="flex items-start gap-3 group cursor-pointer" onclick="toggleCheck(this)">
+                                                        <div class="w-5 h-5 rounded border border-stone-300 flex-shrink-0 mt-0.5 flex items-center justify-center group-hover:border-teal-500 transition">
+                                                            <span class="opacity-0 check-mark text-teal-600 text-xs">✓</span>
+                                                        </div>
+                                                        <span class="text-stone-600 text-sm group-hover:text-stone-900 transition">${action}</span>
+                                                    </li>
+                                                `).join('')}
+                                            </ul>
+                                        </div>
+                                    </div>
+                                `).join('')}
+                            </div>
+                        </div>
+
+                    </div>
+
+                    <div class="xl:w-1/3 space-y-8">
+                        
+                        <div class="bg-white p-6 rounded-xl shadow-sm border border-stone-200">
+                            <h4 class="font-bold text-stone-800 mb-4 text-center">Incident Risk Profile</h4>
+                            <div class="chart-container" style="height: 250px;">
+                                <canvas id="riskRadar"></canvas>
+                            </div>
+                            <p class="text-center text-xs text-stone-400 mt-2">Relative intensity metrics (1-10)</p>
+                        </div>
+
+                        <div class="bg-red-50 border border-red-100 rounded-xl p-6">
+                            <h4 class="font-bold text-red-800 mb-4 flex items-center gap-2">
+                                <span>🛑</span> Executive/External Notification
+                            </h4>
+                            <p class="text-xs text-red-600 mb-3 uppercase font-bold tracking-wide">Notify Management/Legal/PR immediately if:</p>
+                            <ul class="space-y-3">
+                                ${pb.escalation.map(crit => `
+                                    <li class="flex items-start gap-2">
+                                        <span class="text-red-500 mt-1">‼️</span>
+                                        <span class="text-sm text-red-900 font-medium">${crit}</span>
+                                    </li>
+                                `).join('')}
+                            </ul>
+                            <div class="mt-6 pt-4 border-t border-red-200">
+                                <button class="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-2 rounded shadow transition text-sm">
+                                    Initiate Crisis Communication Chain
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="bg-stone-100 rounded-xl p-6 border border-stone-200">
+                             <h4 class="font-bold text-stone-700 mb-3">Relevant Tools & Artifacts</h4>
+                             <div class="flex flex-wrap gap-2">
+                                 <span class="px-3 py-1 bg-white border border-stone-300 rounded text-xs font-semibold text-stone-600">Forensic Imager</span>
+                                 <span class="px-3 py-1 bg-white border border-stone-300 rounded text-xs font-semibold text-stone-600">Memory Dump</span>
+                                 ${index === 0 ? '<span class="px-3 py-1 bg-white border border-stone-300 rounded text-xs font-semibold text-stone-600">Decryption Key Check</span>' : ''}
+                                 ${index === 1 ? '<span class="px-3 py-1 bg-white border border-stone-300 rounded text-xs font-semibold text-stone-600">HR/Legal Contact</span>' : ''}
+                                 ${index === 2 ? '<span class="px-3 py-1 bg-white border border-stone-300 rounded text-xs font-semibold text-stone-600">MITRE ATT&CK Mapping</span>' : ''}
+                             </div>
+                         </div>
+
+                    </div>
+                </div>
+            `;
+
+            contentContainer.innerHTML = html;
+
+            // Render Radar Chart for this playbook
+            initRadarChart(pb.riskProfile);
+        }
+
+        // --- INTERACTION UTILS ---
+        
+        window.toggleCheck = function(el) {
+            const check = el.querySelector('.check-mark');
+            const box = el.querySelector('div');
+            
+            if (check.classList.contains('opacity-0')) {
+                // Check
+                check.classList.remove('opacity-0');
+                check.classList.add('opacity-100');
+                box.classList.add('bg-teal-50', 'border-teal-500');
+                el.classList.add('line-through', 'text-stone-400');
+            } else {
+                // Uncheck
+                check.classList.add('opacity-0');
+                check.classList.remove('opacity-100');
+                box.classList.remove('bg-teal-50', 'border-teal-500');
+                el.classList.remove('line-through', 'text-stone-400');
+            }
+        };
+
+
+        // --- CHART CONFIGURATIONS ---
+
+        function initRadarChart(data) {
+            const ctx = document.getElementById('riskRadar').getContext('2d');
+            
+            // Destroy previous instance if exists
+            if (radarChartInstance) {
+                radarChartInstance.destroy();
+            }
+
+            radarChartInstance = new Chart(ctx, {
+                type: 'radar',
+                data: {
+                    labels: ['Likelihood', 'Complexity', 'Urgency', 'Data Risk', 'User Impact'],
+                    datasets: [{
+                        label: 'Risk Score',
+                        data: data,
+                        backgroundColor: 'rgba(20, 184, 166, 0.2)', // Teal 500 transparent
+                        borderColor: '#14B8A6', // Teal 500
+                        pointBackgroundColor: '#fff',
+                        pointBorderColor: '#14B8A6',
+                        pointHoverBackgroundColor: '#fff',
+                        pointHoverBorderColor: '#14B8A6'
+                    }]
+                },
+                options: {
+                    maintainAspectRatio: false,
+                    scales: {
+                        r: {
+                            beginAtZero: true,
+                            max: 10,
+                            ticks: { display: false, maxTicksLimit: 5 },
+                            pointLabels: {
+                                font: { size: 11, weight: '600' },
+                                color: '#57534E'
+                            }
+                        }
+                    },
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return context.label + ': ' + context.raw + '/10';
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+    </script>
+</body>
+</html>

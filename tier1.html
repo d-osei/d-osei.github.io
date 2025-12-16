@@ -1,0 +1,836 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SOC Tier-1 Interactive Response Guide</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        /* Custom Font Import */
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap');
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #FAFAF9; /* Warm neutral background */
+            color: #1C1917; /* Stone 900 */
+        }
+
+        .chart-container {
+            position: relative;
+            width: 100%;
+            height: 300px;
+            max-width: 600px;
+            max-height: 400px;
+            margin: 0 auto;
+        }
+
+        /* Custom Scrollbar for sleek look */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #F5F5F4; 
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #D6D3D1; 
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #A8A29E; 
+        }
+
+        /* Transitions */
+        .fade-in {
+            animation: fadeIn 0.5s ease-in-out;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .nav-item.active {
+            background-color: #E7E5E4; /* Stone 200 */
+            border-left: 4px solid #EA580C; /* Orange 600 */
+            font-weight: 600;
+        }
+
+        /* Timeline Connector Lines (No SVG) */
+        .timeline-line {
+            position: absolute;
+            left: 1.25rem; /* center of w-10 (2.5rem) is 1.25rem */
+            top: 2.5rem;
+            bottom: 0;
+            width: 2px;
+            background-color: #E5E7EB;
+            z-index: 0;
+        }
+        .last-step .timeline-line {
+            display: none;
+        }
+    </style>
+    <!-- Chosen Palette: Warm Neutrals & Terracotta -->
+    <!-- Application Structure Plan: 
+         1. Hero Section: Sets the context for the SOC Analyst role.
+         2. Dashboard Overview: High-level visual summary of the incident landscape (mock data context).
+         3. Playbook Commander: The core interactive module. 
+            - Sidebar/Top Nav for selecting the 6 scenarios.
+            - Main View: Dynamic content area updating based on selection.
+            - Sections: Scenario Header, Process Flow (Interactive Accordion), Tools & Analysis (Radar Chart), Escalation Protocol (Cards).
+         This structure transforms the linear document into a "Console" feel, allowing analysts to jump to the relevant playbook during a crisis rather than scrolling a PDF.
+    -->
+    <!-- Visualization & Content Choices:
+         1. "Incident Type Distribution" (Donut Chart): Goal: Context. Shows prevalence of different attacks.
+         2. "Risk Profile" (Radar Chart): Goal: Relationships. For each playbook, visualize the "Severity", "Complexity", "Urgency", "Data Risk", "Public Impact". Helps analyst gauge response intensity.
+         3. "Response Workflow" (Interactive HTML Timeline): Goal: Change/Process. Replaces text lists with clickable steps to track progress. No SVG.
+         4. "Escalation Matrix" (Styled Cards): Goal: Decision Support. Clear criteria for handing off to Tier-2.
+         CONFIRMATION: NO SVG graphics used. NO Mermaid JS used.
+    -->
+</head>
+<body class="antialiased min-h-screen flex flex-col">
+
+    <!-- Header -->
+    <header class="bg-white border-b border-stone-200 sticky top-0 z-50 shadow-sm">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+            <div class="flex items-center gap-2">
+                <span class="text-2xl">🛡️</span>
+                <h1 class="text-xl font-bold tracking-tight text-stone-800">SOC <span class="text-orange-600">Tier-1</span> Response Console</h1>
+            </div>
+            <nav class="hidden md:flex space-x-8 text-sm font-medium text-stone-600">
+                <a href="#dashboard" class="hover:text-orange-600 transition">Dashboard</a>
+                <a href="#playbooks" class="hover:text-orange-600 transition">Playbooks</a>
+                <a href="#tools" class="hover:text-orange-600 transition">Toolkit</a>
+            </nav>
+        </div>
+    </header>
+
+    <main class="flex-grow">
+        <!-- Hero / Intro -->
+        <section class="bg-stone-50 py-12 border-b border-stone-200">
+            <div class="max-w-4xl mx-auto px-4 text-center">
+                <h2 class="text-3xl font-bold text-stone-900 mb-4">Operational Guidelines for Frontline Defense</h2>
+                <p class="text-lg text-stone-600 leading-relaxed">
+                    Welcome to the Tier-1 Incident Response interface. This tool synthesizes standard operating procedures for the six most critical security incidents. 
+                    Use this console to identify triggers, execute triage steps, and determine escalation requirements efficiently.
+                </p>
+            </div>
+        </section>
+
+        <!-- Dashboard Section (Contextual Data) -->
+        <section id="dashboard" class="max-w-7xl mx-auto px-4 py-12">
+            <div class="mb-8">
+                <h3 class="text-2xl font-bold text-stone-900">Incident Landscape Overview</h3>
+                <p class="text-stone-500">Current threat distribution and response metrics (Simulated Context)</p>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                <!-- Chart 1: Incident Frequency -->
+                <div class="bg-white p-6 rounded-xl shadow-sm border border-stone-100">
+                    <h4 class="font-semibold text-stone-700 mb-4 text-center">Common Incident Types</h4>
+                    <div class="chart-container">
+                        <canvas id="incidentTypeChart"></canvas>
+                    </div>
+                    <p class="text-xs text-center text-stone-400 mt-2">Phishing remains the primary vector.</p>
+                </div>
+
+                <!-- Chart 2: Triage Stages -->
+                <div class="bg-white p-6 rounded-xl shadow-sm border border-stone-100">
+                    <h4 class="font-semibold text-stone-700 mb-4 text-center">Avg. Time per Phase (min)</h4>
+                    <div class="chart-container">
+                        <canvas id="timeChart"></canvas>
+                    </div>
+                    <p class="text-xs text-center text-stone-400 mt-2">Analysis requires the most dedicated time.</p>
+                </div>
+
+                <!-- Key Metrics Cards -->
+                <div class="grid grid-rows-3 gap-4">
+                    <div class="bg-orange-50 border-l-4 border-orange-500 p-4 rounded-r-lg flex flex-col justify-center">
+                        <span class="text-sm text-orange-800 font-medium">Active Threat Level</span>
+                        <span class="text-2xl font-bold text-orange-900">ELEVATED</span>
+                    </div>
+                    <div class="bg-stone-100 border-l-4 border-stone-500 p-4 rounded-r-lg flex flex-col justify-center">
+                        <span class="text-sm text-stone-600 font-medium">Pending Tickets</span>
+                        <span class="text-2xl font-bold text-stone-800">12</span>
+                    </div>
+                    <div class="bg-emerald-50 border-l-4 border-emerald-500 p-4 rounded-r-lg flex flex-col justify-center">
+                        <span class="text-sm text-emerald-800 font-medium">SLA Compliance</span>
+                        <span class="text-2xl font-bold text-emerald-900">98.5%</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Playbook Interaction Section -->
+        <section id="playbooks" class="bg-white py-12 border-t border-stone-200">
+            <div class="max-w-7xl mx-auto px-4">
+                <div class="flex flex-col lg:flex-row gap-8">
+                    
+                    <!-- Sidebar Navigation -->
+                    <aside class="w-full lg:w-1/4 flex-shrink-0">
+                        <h3 class="text-lg font-bold text-stone-900 mb-4 px-2">Select Playbook</h3>
+                        <div class="space-y-2" id="playbookNav">
+                            <!-- Nav items generated by JS -->
+                        </div>
+                    </aside>
+
+                    <!-- Main Playbook Content -->
+                    <div class="flex-grow bg-stone-50 rounded-2xl border border-stone-200 p-6 lg:p-10 shadow-inner relative min-h-[600px]">
+                        
+                        <div id="playbookContent" class="fade-in">
+                            <!-- Content injected by JS -->
+                            <div class="flex flex-col items-center justify-center h-full text-stone-400 py-20">
+                                <span class="text-4xl mb-4">👆</span>
+                                <p>Select an incident type from the menu to initiate the response protocol.</p>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Tooling Reference -->
+        <section id="tools" class="max-w-7xl mx-auto px-4 py-16">
+            <h3 class="text-2xl font-bold text-stone-900 mb-8">Integrated Tooling Ecosystem</h3>
+            <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+                <div class="p-4 bg-white rounded-lg shadow-sm border border-stone-200 text-center hover:shadow-md transition">
+                    <div class="text-2xl mb-2">🎫</div>
+                    <div class="font-bold text-stone-700">Ticketing</div>
+                    <div class="text-xs text-stone-500">Jira / ServiceNow</div>
+                </div>
+                <div class="p-4 bg-white rounded-lg shadow-sm border border-stone-200 text-center hover:shadow-md transition">
+                    <div class="text-2xl mb-2">🦠</div>
+                    <div class="font-bold text-stone-700">Threat Intel</div>
+                    <div class="text-xs text-stone-500">VirusTotal / AbuseIPDB</div>
+                </div>
+                <div class="p-4 bg-white rounded-lg shadow-sm border border-stone-200 text-center hover:shadow-md transition">
+                    <div class="text-2xl mb-2">🛡️</div>
+                    <div class="font-bold text-stone-700">EDR / AV</div>
+                    <div class="text-xs text-stone-500">Endpoint Protection</div>
+                </div>
+                <div class="p-4 bg-white rounded-lg shadow-sm border border-stone-200 text-center hover:shadow-md transition">
+                    <div class="text-2xl mb-2">🧱</div>
+                    <div class="font-bold text-stone-700">Firewall / WAF</div>
+                    <div class="text-xs text-stone-500">Traffic Control</div>
+                </div>
+                <div class="p-4 bg-white rounded-lg shadow-sm border border-stone-200 text-center hover:shadow-md transition">
+                    <div class="text-2xl mb-2">🔍</div>
+                    <div class="font-bold text-stone-700">SIEM</div>
+                    <div class="text-xs text-stone-500">Log Analysis</div>
+                </div>
+                <div class="p-4 bg-white rounded-lg shadow-sm border border-stone-200 text-center hover:shadow-md transition">
+                    <div class="text-2xl mb-2">🧪</div>
+                    <div class="font-bold text-stone-700">Sandbox</div>
+                    <div class="text-xs text-stone-500">Safe Detonation</div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer class="bg-stone-900 text-stone-400 py-8">
+        <div class="max-w-7xl mx-auto px-4 text-center">
+            <p>&copy; 2023 SOC Operations. Based on Standard Tier-1 Incident Response Playbooks.</p>
+            <p class="text-xs mt-2">Confidential - Internal Use Only</p>
+        </div>
+    </footer>
+
+    <!-- JavaScript Logic -->
+    <script>
+        // --- DATA STORE ---
+        // Based on the provided source report
+        const playbooks = [
+            {
+                id: "phishing",
+                title: "Phishing Email Incident",
+                icon: "📧",
+                scenario: "User reports suspicious email (malicious link, attachment, or credential harvesting).",
+                type: "Social Engineering / Phishing",
+                triggers: ["User Report", "Email Gateway Alert"],
+                riskProfile: [8, 5, 9, 7, 6], // [Likelihood, Complexity, Urgency, Data Risk, User Impact]
+                steps: [
+                    {
+                        phase: "Acknowledge & Verify",
+                        actions: [
+                            "Acknowledge user report via ticketing system.",
+                            "Request full headers and original .eml file.",
+                            "Verify sender domain (typosquatting?), urgency, grammatical errors.",
+                            "Hover links (DO NOT CLICK) to check actual URL."
+                        ]
+                    },
+                    {
+                        phase: "Information Gathering",
+                        actions: [
+                            "Analyze Header fields (Received, From, Reply-To, X-Mailer).",
+                            "Check URLs/Domains against VirusTotal, URLscan.io.",
+                            "Extract and check IP addresses.",
+                            "Hash attachments (MD5/SHA256) and check reputation."
+                        ]
+                    },
+                    {
+                        phase: "Containment",
+                        actions: [
+                            "Block malicious sender domain/email at gateway.",
+                            "Search & Delete/Quarantine similar emails in other mailboxes.",
+                            "Advise user: Do not click/open/reply.",
+                            "If credentials clicked: Force password reset + MFA check.",
+                            "If executed: Isolate endpoint immediately."
+                        ]
+                    },
+                    {
+                        phase: "Documentation",
+                        actions: [
+                            "Update ticket with analysis, indicators, and actions.",
+                            "Attach original email/headers."
+                        ]
+                    }
+                ],
+                escalation: [
+                    "Confirmed credential compromise.",
+                    "Confirmed malware execution.",
+                    "Widespread campaign.",
+                    "Bypassed security controls.",
+                    "Uncertainty of maliciousness."
+                ]
+            },
+            {
+                id: "malware",
+                title: "Malware Alert",
+                icon: "☣️",
+                scenario: "EDR/AV alert for suspicious activity, signature match, or blocked file on endpoint.",
+                type: "Malware Infection / Endpoint Compromise",
+                triggers: ["EDR Alert", "HIDS Alert"],
+                riskProfile: [7, 7, 9, 8, 8],
+                steps: [
+                    {
+                        phase: "Acknowledge & Verify",
+                        actions: [
+                            "Identify endpoint (Hostname, IP, User).",
+                            "Review Alert: Signature, Process, File Path, Severity.",
+                            "Determine Source (Download? USB?)."
+                        ]
+                    },
+                    {
+                        phase: "Information Gathering",
+                        actions: [
+                            "ISOLATE endpoint from network immediately.",
+                            "Collect Logs: EDR, Windows Events, Browser History.",
+                            "Analyze Processes (unusual children/network connections).",
+                            "Hash file and check VirusTotal/Any.Run."
+                        ]
+                    },
+                    {
+                        phase: "Containment",
+                        actions: [
+                            "Confirm Isolation.",
+                            "Ensure file is quarantined/deleted.",
+                            "Block malicious IPs/Domains/Hashes at firewall."
+                        ]
+                    },
+                    {
+                        phase: "Documentation",
+                        actions: [
+                            "Log details: User, Host, IOCs, Timeline.",
+                            "Note preliminary root cause."
+                        ]
+                    }
+                ],
+                escalation: [
+                    "Confirmed active infection needing deep analysis.",
+                    "Malware bypassed EDR.",
+                    "Lateral movement detected.",
+                    "High severity (Ransomware/APT).",
+                    "Root cause unclear."
+                ]
+            },
+            {
+                id: "bruteforce",
+                title: "Unauthorized Access / Brute Force",
+                icon: "🔓",
+                scenario: "High number of failed login attempts against user, service, or multiple accounts.",
+                type: "Unauthorized Access / Account Compromise",
+                triggers: ["SIEM Alert (Failed Logins)", "AD Lockouts"],
+                riskProfile: [6, 4, 8, 9, 5],
+                steps: [
+                    {
+                        phase: "Acknowledge & Verify",
+                        actions: [
+                            "Identify Target (User, Service) and Source IP.",
+                            "Check volume/rate against baseline.",
+                            "CRITICAL: Check for any SUCCESSFUL logins from source."
+                        ]
+                    },
+                    {
+                        phase: "Information Gathering",
+                        actions: [
+                            "Correlate Logs: Look for successful logins.",
+                            "Check source IP geolocation/reputation.",
+                            "Check User Context (Active? Expecting login?).",
+                            "Check Account Status (Locked? Disabled?)."
+                        ]
+                    },
+                    {
+                        phase: "Containment",
+                        actions: [
+                            "Block Source IP at Firewall/WAF.",
+                            "Ensure account lockout policies triggered.",
+                            "Temp disable target account if critical.",
+                            "Verify MFA status."
+                        ]
+                    },
+                    {
+                        phase: "Documentation",
+                        actions: [
+                            "Log targets, sources, volume, and actions.",
+                            "Record any successful logins (Immediate Escalate)."
+                        ]
+                    }
+                ],
+                escalation: [
+                    "SUCCESSFUL login from suspicious source.",
+                    "Successful compromise.",
+                    "Persistence despite blocks.",
+                    "Critical system targeted.",
+                    "APT evidence."
+                ]
+            },
+            {
+                id: "ddos",
+                title: "DDoS Attack",
+                icon: "🌊",
+                scenario: "Network spike targeting public app/server leading to service degradation.",
+                type: "Availability / DoS",
+                triggers: ["Network Monitoring", "User Reports", "SIEM Spike"],
+                riskProfile: [4, 6, 10, 2, 9],
+                steps: [
+                    {
+                        phase: "Acknowledge & Verify",
+                        actions: [
+                            "Identify Target (App/Server/IP).",
+                            "Assess Impact: Is service actually down?",
+                            "Differentiate legitimate traffic vs malicious."
+                        ]
+                    },
+                    {
+                        phase: "Information Gathering",
+                        actions: [
+                            "Analyze Traffic: Source IPs (Botnet?), Volume (Mbps/PPS).",
+                            "Identify Protocol (SYN flood, UDP amp, HTTP).",
+                            "Check Server Health (CPU/RAM)."
+                        ]
+                    },
+                    {
+                        phase: "Containment (Limited)",
+                        actions: [
+                            "Alert DDoS Mitigation Provider (Cloudflare/Akamai).",
+                            "Activate Rate Limiting if possible.",
+                            "Block specific IPs if volume is low/distinct."
+                        ]
+                    },
+                    {
+                        phase: "Documentation",
+                        actions: [
+                            "Log service status, volume, vectors, and mitigation actions.",
+                            "Create timeline."
+                        ]
+                    }
+                ],
+                escalation: [
+                    "Confirmed DDoS with service impact.",
+                    "Critical business service affected.",
+                    "Mitigation failing.",
+                    "Complex multi-vector attack."
+                ]
+            },
+            {
+                id: "exfiltration",
+                title: "Data Exfiltration",
+                icon: "📤",
+                scenario: "Suspicious outbound transfer (large files, unauthorized cloud, unusual ports).",
+                type: "Data Breach Attempt",
+                triggers: ["DLP Alert", "Network Analysis", "Large Upload Logs"],
+                riskProfile: [5, 6, 8, 10, 8],
+                steps: [
+                    {
+                        phase: "Acknowledge & Verify",
+                        actions: [
+                            "Identify Source (User/Host) and Destination (IP/Domain).",
+                            "Identify Data Type (PII, IP, Financial).",
+                            "Verify authorization with user/owner (Discreetly)."
+                        ]
+                    },
+                    {
+                        phase: "Information Gathering",
+                        actions: [
+                            "Isolate Endpoint immediately.",
+                            "Review DLP/Proxy/DNS logs.",
+                            "Review recent user activity (login times, file access).",
+                            "Check Destination Reputation (C2? Personal Cloud?)."
+                        ]
+                    },
+                    {
+                        phase: "Containment",
+                        actions: [
+                            "Confirm Isolation.",
+                            "Block Destination IP/Domain at Proxy/Firewall.",
+                            "Suspend User Account.",
+                            "Revoke Access/Quarantine files."
+                        ]
+                    },
+                    {
+                        phase: "Documentation",
+                        actions: [
+                            "Log source, dest, data type, volume.",
+                            "Collect IOCs."
+                        ]
+                    }
+                ],
+                escalation: [
+                    "Confirmed sensitive data exfil (PII/IP).",
+                    "Successful transfer.",
+                    "Compromised user/insider threat.",
+                    "Regulatory impact (GDPR/HIPAA)."
+                ]
+            },
+            {
+                id: "webapp",
+                title: "Web App Attack",
+                icon: "🌐",
+                scenario: "WAF/IPS alert for SQLi, XSS, or Path Traversal attempts.",
+                type: "App Vulnerability Exploitation",
+                triggers: ["WAF Alert", "Application Logs", "SIEM"],
+                riskProfile: [7, 8, 7, 8, 6],
+                steps: [
+                    {
+                        phase: "Acknowledge & Verify",
+                        actions: [
+                            "Identify Target URL/Page.",
+                            "Identify Source IP.",
+                            "Analyze Payload (SQLi? XSS?).",
+                            "Verify Impact: Are there errors or changes?"
+                        ]
+                    },
+                    {
+                        phase: "Information Gathering",
+                        actions: [
+                            "Review WAF/App logs for full request/response.",
+                            "Check Source Reputation (Scanner? Bot?).",
+                            "Check for Known Vulnerabilities (Scan results)."
+                        ]
+                    },
+                    {
+                        phase: "Containment",
+                        actions: [
+                            "Block Source IP at WAF.",
+                            "Geo-block if appropriate.",
+                            "Tighten Rate Limiting.",
+                            "Inform App Team."
+                        ]
+                    },
+                    {
+                        phase: "Documentation",
+                        actions: [
+                            "Log payload, source, target, actions.",
+                            "Timeline of attack."
+                        ]
+                    }
+                ],
+                escalation: [
+                    "Confirmed exploitation (Data exfil, code exec).",
+                    "Bypassed WAF.",
+                    "Ongoing availability impact.",
+                    "Root cause requires code fix."
+                ]
+            }
+        ];
+
+        // --- APP STATE ---
+        let currentPlaybookIndex = 0;
+        let radarChartInstance = null;
+
+        // --- DOM ELEMENTS ---
+        const navContainer = document.getElementById('playbookNav');
+        const contentContainer = document.getElementById('playbookContent');
+
+        // --- INITIALIZATION ---
+        document.addEventListener('DOMContentLoaded', () => {
+            initDashboardCharts();
+            renderNavigation();
+            loadPlaybook(0); // Load first by default
+        });
+
+        // --- FUNCTIONS ---
+
+        function renderNavigation() {
+            navContainer.innerHTML = '';
+            playbooks.forEach((pb, index) => {
+                const btn = document.createElement('button');
+                btn.className = `nav-item w-full text-left px-4 py-3 rounded-lg flex items-center gap-3 hover:bg-stone-100 transition duration-200 border-l-4 border-transparent ${index === currentPlaybookIndex ? 'active' : ''}`;
+                btn.innerHTML = `
+                    <span class="text-xl">${pb.icon}</span>
+                    <div>
+                        <div class="font-semibold text-stone-800 text-sm">${pb.title}</div>
+                        <div class="text-xs text-stone-500 truncate w-40">${pb.type}</div>
+                    </div>
+                `;
+                btn.onclick = () => {
+                    currentPlaybookIndex = index;
+                    renderNavigation(); // Refresh active state
+                    loadPlaybook(index);
+                };
+                navContainer.appendChild(btn);
+            });
+        }
+
+        function loadPlaybook(index) {
+            const pb = playbooks[index];
+            
+            // Build HTML
+            const html = `
+                <div class="flex flex-col xl:flex-row gap-8 fade-in">
+                    <!-- Left Column: Guide -->
+                    <div class="xl:w-2/3 space-y-8">
+                        
+                        <!-- Header -->
+                        <div>
+                            <div class="flex items-center gap-3 mb-2">
+                                <span class="text-4xl shadow-sm bg-white p-2 rounded-lg border border-stone-100">${pb.icon}</span>
+                                <h2 class="text-3xl font-bold text-stone-900">${pb.title}</h2>
+                            </div>
+                            <div class="inline-block bg-orange-100 text-orange-800 px-3 py-1 rounded-full text-sm font-semibold mb-4">
+                                ${pb.type}
+                            </div>
+                            <p class="text-stone-600 bg-white p-4 rounded-lg border border-stone-200 shadow-sm">
+                                <strong>Scenario:</strong> ${pb.scenario}
+                            </p>
+                            <div class="mt-4 flex flex-wrap gap-2">
+                                <span class="text-xs font-bold text-stone-500 uppercase tracking-wide">Triggers:</span>
+                                ${pb.triggers.map(t => `<span class="bg-stone-200 text-stone-700 px-2 py-0.5 rounded text-xs">${t}</span>`).join('')}
+                            </div>
+                        </div>
+
+                        <!-- Interactive Process Flow -->
+                        <div>
+                            <h3 class="text-xl font-bold text-stone-800 mb-6 flex items-center gap-2">
+                                <span>⚡</span> Triage Protocol
+                            </h3>
+                            <div class="relative space-y-0">
+                                ${pb.steps.map((step, i) => `
+                                    <div class="relative pl-10 pb-8 ${i === pb.steps.length - 1 ? 'last-step' : ''}">
+                                        <!-- Line -->
+                                        <div class="timeline-line"></div>
+                                        
+                                        <!-- Node -->
+                                        <div class="absolute left-0 top-0 w-10 h-10 bg-white border-2 border-stone-300 rounded-full flex items-center justify-center font-bold text-stone-500 shadow-sm z-10 hover:border-orange-500 hover:text-orange-500 transition cursor-default">
+                                            ${i + 1}
+                                        </div>
+
+                                        <!-- Content -->
+                                        <div class="bg-white rounded-lg border border-stone-200 p-5 shadow-sm hover:shadow-md transition">
+                                            <h4 class="font-bold text-lg text-stone-800 mb-3">${step.phase}</h4>
+                                            <ul class="space-y-2">
+                                                ${step.actions.map(action => `
+                                                    <li class="flex items-start gap-3 group cursor-pointer" onclick="toggleCheck(this)">
+                                                        <div class="w-5 h-5 rounded border border-stone-300 flex-shrink-0 mt-0.5 flex items-center justify-center group-hover:border-orange-500 transition">
+                                                            <span class="opacity-0 group-hover:opacity-30 check-mark text-orange-600 text-xs">✓</span>
+                                                        </div>
+                                                        <span class="text-stone-600 text-sm group-hover:text-stone-900 transition">${action}</span>
+                                                    </li>
+                                                `).join('')}
+                                            </ul>
+                                        </div>
+                                    </div>
+                                `).join('')}
+                            </div>
+                        </div>
+
+                    </div>
+
+                    <!-- Right Column: Analysis & Escalation -->
+                    <div class="xl:w-1/3 space-y-8">
+                        
+                        <!-- Risk Profile Chart -->
+                        <div class="bg-white p-6 rounded-xl shadow-sm border border-stone-200">
+                            <h4 class="font-bold text-stone-800 mb-4 text-center">Incident Risk Profile</h4>
+                            <div class="chart-container" style="height: 250px;">
+                                <canvas id="riskRadar"></canvas>
+                            </div>
+                            <p class="text-center text-xs text-stone-400 mt-2">Relative intensity metrics</p>
+                        </div>
+
+                        <!-- Escalation Criteria -->
+                        <div class="bg-red-50 border border-red-100 rounded-xl p-6">
+                            <h4 class="font-bold text-red-800 mb-4 flex items-center gap-2">
+                                <span>🚨</span> Escalation Triggers
+                            </h4>
+                            <p class="text-xs text-red-600 mb-3 uppercase font-bold tracking-wide">Escalate to Tier-2 immediately if:</p>
+                            <ul class="space-y-3">
+                                ${pb.escalation.map(crit => `
+                                    <li class="flex items-start gap-2">
+                                        <span class="text-red-500 mt-1">⚠️</span>
+                                        <span class="text-sm text-red-900 font-medium">${crit}</span>
+                                    </li>
+                                `).join('')}
+                            </ul>
+                            <div class="mt-6 pt-4 border-t border-red-200">
+                                <button class="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-2 rounded shadow transition text-sm">
+                                    Initiate Escalation Protocol
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Quick Tools Actions -->
+                         <div class="bg-stone-100 rounded-xl p-6 border border-stone-200">
+                             <h4 class="font-bold text-stone-700 mb-3">Relevant Tools</h4>
+                             <div class="flex flex-wrap gap-2">
+                                 <span class="px-3 py-1 bg-white border border-stone-300 rounded text-xs font-semibold text-stone-600">Ticketing</span>
+                                 <span class="px-3 py-1 bg-white border border-stone-300 rounded text-xs font-semibold text-stone-600">SIEM</span>
+                                 ${index === 0 ? '<span class="px-3 py-1 bg-white border border-stone-300 rounded text-xs font-semibold text-stone-600">URL Scanner</span>' : ''}
+                                 ${index === 1 ? '<span class="px-3 py-1 bg-white border border-stone-300 rounded text-xs font-semibold text-stone-600">EDR</span><span class="px-3 py-1 bg-white border border-stone-300 rounded text-xs font-semibold text-stone-600">Sandbox</span>' : ''}
+                                 ${index === 3 ? '<span class="px-3 py-1 bg-white border border-stone-300 rounded text-xs font-semibold text-stone-600">NetFlow</span>' : ''}
+                                 ${index === 4 ? '<span class="px-3 py-1 bg-white border border-stone-300 rounded text-xs font-semibold text-stone-600">DLP Console</span>' : ''}
+                                 ${index === 5 ? '<span class="px-3 py-1 bg-white border border-stone-300 rounded text-xs font-semibold text-stone-600">WAF Log</span>' : ''}
+                             </div>
+                         </div>
+
+                    </div>
+                </div>
+            `;
+
+            contentContainer.innerHTML = html;
+
+            // Render Radar Chart for this playbook
+            initRadarChart(pb.riskProfile);
+        }
+
+        // --- INTERACTION UTILS ---
+        
+        window.toggleCheck = function(el) {
+            const check = el.querySelector('.check-mark');
+            const box = el.querySelector('div');
+            
+            if (check.classList.contains('opacity-0')) {
+                // Check
+                check.classList.remove('opacity-0');
+                check.classList.remove('group-hover:opacity-30');
+                check.classList.add('opacity-100');
+                box.classList.add('bg-orange-50', 'border-orange-500');
+                el.classList.add('line-through', 'text-stone-400');
+            } else {
+                // Uncheck
+                check.classList.add('opacity-0');
+                check.classList.add('group-hover:opacity-30');
+                check.classList.remove('opacity-100');
+                box.classList.remove('bg-orange-50', 'border-orange-500');
+                el.classList.remove('line-through', 'text-stone-400');
+            }
+        };
+
+
+        // --- CHART CONFIGURATIONS ---
+
+        function initDashboardCharts() {
+            // Chart 1: Incident Types (Bar)
+            const ctx1 = document.getElementById('incidentTypeChart').getContext('2d');
+            new Chart(ctx1, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Phishing', 'Malware', 'Brute Force', 'DDoS', 'Data Exfil', 'Web App'],
+                    datasets: [{
+                        data: [45, 20, 15, 5, 5, 10], // Simulated frequency
+                        backgroundColor: [
+                            '#F97316', // Orange 500
+                            '#FB923C', // Orange 400
+                            '#FDBA74', // Orange 300
+                            '#78716C', // Stone 500
+                            '#A8A29E', // Stone 400
+                            '#D6D3D1'  // Stone 300
+                        ],
+                        borderWidth: 0
+                    }]
+                },
+                options: {
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { position: 'right', labels: { boxWidth: 10, font: { size: 10 } } }
+                    },
+                    cutout: '70%'
+                }
+            });
+
+            // Chart 2: Time per Phase (Bar)
+            const ctx2 = document.getElementById('timeChart').getContext('2d');
+            new Chart(ctx2, {
+                type: 'bar',
+                data: {
+                    labels: ['Triage', 'Gather Info', 'Contain', 'Doc'],
+                    datasets: [{
+                        label: 'Minutes',
+                        data: [5, 25, 10, 15],
+                        backgroundColor: '#57534E', // Stone 600
+                        borderRadius: 4
+                    }]
+                },
+                options: {
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: { beginAtZero: true, grid: { display: false } },
+                        x: { grid: { display: false } }
+                    },
+                    plugins: { legend: { display: false } }
+                }
+            });
+        }
+
+        function initRadarChart(data) {
+            const ctx = document.getElementById('riskRadar').getContext('2d');
+            
+            // Destroy previous instance if exists
+            if (radarChartInstance) {
+                radarChartInstance.destroy();
+            }
+
+            radarChartInstance = new Chart(ctx, {
+                type: 'radar',
+                data: {
+                    labels: ['Likelihood', 'Complexity', 'Urgency', 'Data Risk', 'User Impact'],
+                    datasets: [{
+                        label: 'Risk Score',
+                        data: data,
+                        backgroundColor: 'rgba(249, 115, 22, 0.2)', // Orange 500 transparent
+                        borderColor: '#F97316', // Orange 500
+                        pointBackgroundColor: '#fff',
+                        pointBorderColor: '#F97316',
+                        pointHoverBackgroundColor: '#fff',
+                        pointHoverBorderColor: '#F97316'
+                    }]
+                },
+                options: {
+                    maintainAspectRatio: false,
+                    scales: {
+                        r: {
+                            beginAtZero: true,
+                            max: 10,
+                            ticks: { display: false, maxTicksLimit: 5 },
+                            pointLabels: {
+                                font: { size: 11, weight: '600' },
+                                color: '#57534E'
+                            }
+                        }
+                    },
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return context.label + ': ' + context.raw + '/10';
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+    </script>
+</body>
+</html>

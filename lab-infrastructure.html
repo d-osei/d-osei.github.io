@@ -33,7 +33,7 @@
         <div class="max-w-5xl mx-auto px-4 h-16 flex items-center justify-between">
             <div class="flex items-center gap-2">
                 <span class="text-2xl">🖥️</span>
-                <a href="index.html" class="text-xl font-bold text-stone-800 hover:text-sky-600 transition">d-osei Portfolio</a>
+                <a href="index.html" class="text-xl font-bold text-stone-800 hover:text-sky-600 transition">Daniel Osei Portfolio</a>
             </div>
             <nav class="flex space-x-6 text-sm font-medium text-stone-600">
                 <a href="index.html" class="hover:text-sky-600 transition">Home</a>
@@ -52,20 +52,20 @@
             </div>
             <h1 class="text-4xl md:text-5xl font-extrabold text-stone-900 mb-6">Lab Infrastructure: The Dell AIO Cyber Range</h1>
             <p class="text-xl text-stone-600 leading-relaxed">
-                [cite_start]This project documents the design, setup, and configuration of a dedicated, isolated cybersecurity lab built around a repurposed Dell OptiPlex All-in-One (AIO) server and a MacBook Pro management station[cite: 22].
+                This project documents the design, setup, and configuration of a dedicated, isolated cybersecurity lab built around a repurposed Dell OptiPlex All-in-One (AIO) server and a MacBook Pro management station.
             </p>
         </div>
 
         <section class="mb-16 bg-white p-8 rounded-2xl shadow-sm border border-stone-200">
             <h2 class="text-2xl font-bold text-stone-800 mb-4 section-header">1. Lab Topology and Architecture</h2>
             <p class="text-stone-700 mb-6">
-                [cite_start]The lab follows a client-server model, utilizing a Type-1 hypervisor on the server (Dell AIO) and a Type-2 hypervisor on the management station (MacBook Pro)[cite: 25].
+                The lab follows a client-server model, utilizing a Type-1 hypervisor on the server (Dell AIO) and a Type-2 hypervisor on the management station (MacBook Pro).
             </p>
             
             <figure class="mb-8 border border-stone-200 rounded-lg overflow-hidden bg-stone-50">
                 <img src="images/topology.png" alt="Lab Topology Diagram" class="w-full h-auto object-cover">
                 <figcaption class="p-3 text-center text-sm text-stone-500 bg-stone-100 border-t border-stone-200">
-                    [cite_start]Figure 1: High-level Network Topology [cite: 587]
+                    Figure 1: High-level Network Topology 
                 </figcaption>
             </figure>
         </section>
@@ -124,12 +124,12 @@
             <div class="mb-10">
                 <h3 class="text-xl font-bold text-red-600 mb-3">3.1 The Challenge: Creating the Installer</h3>
                 <p class="text-stone-700 mb-4">
-                    The installation of the ESXi hypervisor presented a key technical challenge. [cite_start]Standard graphical tools failed to create a bootable drive for this specific hardware configuration (Dell OptiPlex 7440) [cite: 593-594].
+                    The installation of the ESXi hypervisor presented a key technical challenge. Standard graphical tools failed to create a bootable drive for this specific hardware configuration (Dell OptiPlex 7440).
                 </p>
                 <div class="flex flex-col md:flex-row gap-6">
                     <div class="flex-1">
                         <p class="text-stone-700 mb-2">
-                            <strong>The Failure:</strong> I initially attempted to use <code>balenaEtcher</code> to flash the ISO. [cite_start]However, it failed to create a partition table that the Dell BIOS could recognize [cite: 595-596].
+                            <strong>The Failure:</strong> I initially attempted to use <code>balenaEtcher</code> to flash the ISO. However, it failed to create a partition table that the Dell BIOS could recognize.
                         </p>
                         <ul class="list-disc list-inside text-stone-600 ml-2">
                             <li>Missing partition table warning.</li>
@@ -138,7 +138,7 @@
                     </div>
                     <div class="flex-1">
                          <img src="images/etcher-error.png" alt="BalenaEtcher Warning" class="rounded shadow border border-stone-200 w-full">
-                        [cite_start]<p class="text-xs text-stone-500 mt-1">Figure 1: Missing partition table error [cite: 603]</p>
+                         <p class="text-xs text-stone-500 mt-1">Figure 1: Missing partition table error</p>
                     </div>
                 </div>
             </div>
@@ -146,19 +146,19 @@
             <div class="mb-10">
                 <h3 class="text-xl font-bold text-green-700 mb-3">3.2 The Solution: Native Terminal Formatting</h3>
                 <p class="text-stone-700 mb-4">
-                    [cite_start]To resolve this, I bypassed GUI tools and utilized macOS native terminal utilities to manually structure the drive with an MBR (Master Boot Record) partition map and FAT32 file system[cite: 606].
+                    To resolve this, I bypassed GUI tools and utilized macOS native terminal utilities to manually structure the drive with an MBR (Master Boot Record) partition map and FAT32 file system.
                 </p>
 
                 <div class="space-y-6">
                     <div class="bg-white p-5 rounded-lg border border-stone-200">
                         <h4 class="font-bold text-stone-800 mb-2">Step 1: Formatting and Partitioning</h4>
                         <pre class="code-block">diskutil eraseDisk MS-DOS "ESXI" MBR disk4</pre>
-                        [cite_start]<p class="text-sm text-stone-600 mt-2">This command reformats the disk with the required MBR scheme[cite: 609].</p>
+                        <p class="text-sm text-stone-600 mt-2">This command reformats the disk with the required MBR scheme.</p>
                     </div>
 
                     <div class="bg-white p-5 rounded-lg border border-stone-200">
                         <h4 class="font-bold text-stone-800 mb-2">Step 2: Marking Partition as Active</h4>
-                        [cite_start]<p class="text-sm text-stone-600 mb-2">Using <code>fdisk</code> was critical to flag the partition as bootable for the legacy BIOS[cite: 611].</p>
+                        <p class="text-sm text-stone-600 mb-2">Using <code>fdisk</code> was critical to flag the partition as bootable for the legacy BIOS.</p>
                         <pre class="code-block">sudo fdisk -e /dev/disk4
 > f 1      # Flag partition 1 as active
 > write    # Write changes to table
@@ -169,7 +169,7 @@
                         <h4 class="font-bold text-stone-800 mb-2">Step 3: Mounting and Copying Files</h4>
                         <pre class="code-block">hdiutil attach VMware-VMvisor-Installer-8.0U3e.iso
 cp -Rv /Volumes/ESXI-INSTALLER/* /Volumes/ESXI/</pre>
-                        [cite_start]<p class="text-sm text-stone-600 mt-2">Manually copying the installer contents to the newly prepared bootable USB[cite: 615].</p>
+                        <p class="text-sm text-stone-600 mt-2">Manually copying the installer contents to the newly prepared bootable USB.</p>
                     </div>
                 </div>
             </div>
@@ -177,7 +177,7 @@ cp -Rv /Volumes/ESXI-INSTALLER/* /Volumes/ESXI/</pre>
             <div class="mb-10">
                 <h3 class="text-xl font-bold text-stone-800 mb-3">3.3 Boot Configuration Edit</h3>
                 <p class="text-stone-700 mb-4">
-                    To ensure the bootloader could locate the kernel, I edited the <code>isolinux.cfg</code> file, modifying the APPEND line to include <code>-p 1</code>. [cite_start]This prevents "Bank not found" errors[cite: 617].
+                    To ensure the bootloader could locate the kernel, I edited the <code>isolinux.cfg</code> file, modifying the APPEND line to include <code>-p 1</code>. This prevents "Bank not found" errors.
                 </p>
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6 items-center">
                     <pre class="code-block h-full flex items-center">LABEL install
@@ -185,7 +185,7 @@ cp -Rv /Volumes/ESXI-INSTALLER/* /Volumes/ESXI/</pre>
   APPEND -c boot.cfg -p 1</pre>
                     <div>
                          <img src="images/boot-config.png" alt="Nano Editor Config" class="rounded shadow border border-stone-200 w-full">
-                        [cite_start]<p class="text-xs text-stone-500 mt-1">Figure 3: Appending the partition flag [cite: 642]</p>
+                        <p class="text-xs text-stone-500 mt-1">Figure 3: Appending the partition flag</p>
                     </div>
                 </div>
             </div>
@@ -193,17 +193,17 @@ cp -Rv /Volumes/ESXI-INSTALLER/* /Volumes/ESXI/</pre>
             <div class="mb-10">
                 <h3 class="text-xl font-bold text-stone-800 mb-3">3.4 Post-Install Configuration (DCUI)</h3>
                 <p class="text-stone-700 mb-4">
-                    Once installed, I accessed the Direct Console User Interface (DCUI) to configure the management network. [cite_start]I disabled DHCP and assigned a static IP (10.0.0.10) to ensure reliable remote management [cite: 644-645].
+                    Once installed, I accessed the Direct Console User Interface (DCUI) to configure the management network. I disabled DHCP and assigned a static IP (10.0.0.10) to ensure reliable remote management.
                 </p>
                  <img src="images/dcui-network.png" alt="DCUI Configuration" class="rounded shadow border border-stone-200 w-full max-w-2xl mx-auto">
-                [cite_start]<p class="text-xs text-stone-500 mt-1 text-center">Figure 5 & 6: Static IP Assignment [cite: 661]</p>
+                 <p class="text-xs text-stone-500 mt-1 text-center">Figure 5 & 6: Static IP Assignment</p>
             </div>
         </section>
 
         <section class="mb-16 bg-stone-900 text-white p-8 rounded-2xl shadow-lg">
             <h2 class="text-2xl font-bold text-white mb-6 section-header border-stone-700">4. Final Status and Conclusion</h2>
             <p class="text-stone-300 mb-6">
-                The Dell AIO is now fully operational as a "headless" hypervisor. [cite_start]Verification is confirmed via the VMware ESXi Host Client running on the MacBook Pro [cite: 663-664].
+                The Dell AIO is now fully operational as a "headless" hypervisor. Verification is confirmed via the VMware ESXi Host Client running on the MacBook Pro.
             </p>
             
             <div class="rounded-lg overflow-hidden border border-stone-700 shadow-2xl mb-6">
@@ -232,9 +232,9 @@ cp -Rv /Volumes/ESXI-INSTALLER/* /Volumes/ESXI/</pre>
         <section class="mb-12">
             <h2 class="text-xl font-bold text-stone-800 mb-4">Next Steps: Phase 2</h2>
             <ul class="list-disc list-inside text-stone-600 mb-8 ml-2">
-                [cite_start]<li>Security Onion: Deploying the NSM sensor[cite: 720].</li>
-                [cite_start]<li>Kali Linux: Configuring the attack box[cite: 721].</li>
-                [cite_start]<li>Attack Simulation: Running the first "live fire" exercise[cite: 722].</li>
+                <li>Security Onion: Deploying the NSM sensor.</li>
+                <li>Kali Linux: Configuring the attack box.</li>
+                <li>Attack Simulation: Running the first "live fire" exercise.</li>
             </ul>
 
             <a href="build_notes.html" class="block group">
@@ -242,7 +242,7 @@ cp -Rv /Volumes/ESXI-INSTALLER/* /Volumes/ESXI/</pre>
                     <div class="flex justify-between items-center">
                         <div>
                             <h3 class="text-lg font-bold text-stone-900 group-hover:text-sky-600 transition">📂 View Phase 2: VM Build Notes</h3>
-                            [cite_start]<p class="text-stone-600 mt-1">Documentation on how I deployed Security Onion, Kali, and Windows Targets on top of this infrastructure[cite: 724].</p>
+                            <p class="text-stone-600 mt-1">Documentation on how I deployed SIEM(Splunk Enterprise) on Ubuntu server, Kali, and Windows Sysmon on Windows Targets on top of this infrastructure.</p>
                         </div>
                         <div class="text-3xl text-stone-300 group-hover:text-sky-500 transition">→</div>
                     </div>
@@ -253,7 +253,7 @@ cp -Rv /Volumes/ESXI-INSTALLER/* /Volumes/ESXI/</pre>
     </main>
 
     <footer class="bg-stone-900 text-stone-400 py-8 text-center mt-auto">
-        <p>&copy; 2025 d-osei Portfolio. [cite_start]Systems Architecture & SOC Operations[cite: 725].</p>
+        <p>&copy; 2025 Daniel Osei Portfolio. Systems Architecture & SOC Operations.</p>
     </footer>
 
 </body>

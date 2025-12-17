@@ -1,0 +1,391 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Splunk BOTSv1 Investigative Console</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #FAFAF9; /* Warm neutral background */
+            color: #1C1917; /* Stone 900 */
+        }
+        .chart-container {
+            position: relative;
+            width: 100%;
+            height: 250px;
+            max-width: 450px;
+            max-height: 300px;
+            margin: 0 auto;
+        }
+        .nav-item.active {
+            background-color: #FEEEDD; /* Light Terracotta */
+            border-left: 4px solid #EA580C; /* Terracotta Accent */
+            font-weight: 600;
+        }
+        .spl-command {
+            background-color: #E7E5E4; /* Stone 200 - light gray background */
+            font-family: monospace;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+        .spl-command:hover {
+            background-color: #F5F5F4; /* Lighter on hover */
+        }
+        /* Custom scrollbar */
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #F5F5F4; } 
+        ::-webkit-scrollbar-thumb { background: #D6D3D1; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #A8A29E; }
+    </style>
+</head>
+<body class="antialiased h-screen flex flex-col overflow-hidden">
+
+    <header class="bg-white border-b border-stone-200 sticky top-0 z-50 shadow-sm flex-shrink-0">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+            <div class="flex items-center gap-2">
+                <span class="text-2xl">🔎</span>
+                <h1 class="text-xl font-bold tracking-tight text-stone-800">Splunk <span class="text-orange-600">BOTSv1</span> Console</h1>
+            </div>
+            <nav class="flex space-x-8 text-sm font-medium text-stone-600">
+                <a href="index.html" class="hover:text-orange-600 transition font-bold">Home</a>
+                <a href="tier1.html" class="hover:text-orange-600 transition">Tier-1</a>
+                <a href="tier2.html" class="hover:text-orange-600 transition">Tier-2</a>
+            </nav>
+        </div>
+    </header>
+
+    <div class="flex flex-1 overflow-hidden">
+        
+        <aside class="w-full lg:w-1/5 bg-white border-r border-stone-200 p-4 shadow-lg flex-shrink-0 overflow-y-auto hidden md:block">
+            <h1 class="text-xs font-bold text-stone-500 uppercase tracking-wider mb-4 border-b border-stone-100 pb-2">Investigative Phases</h1>
+            <div class="space-y-2" id="playbookNav">
+                </div>
+
+            <div class="mt-8 pt-4 border-t border-stone-200">
+                <h3 class="text-xs font-semibold text-stone-600 mb-2 uppercase tracking-wider">Data Source Context</h3>
+                <div class="bg-stone-50 p-3 rounded-lg border border-stone-100">
+                    <div class="chart-container">
+                        <canvas id="sourcetypeChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </aside>
+
+        <main class="flex-grow w-full lg:w-4/5 p-4 md:p-8 overflow-y-auto bg-stone-50">
+            
+            <div class="max-w-5xl mx-auto">
+                <header class="mb-8">
+                    <div class="flex items-center gap-3 mb-2">
+                        <span class="bg-orange-100 text-orange-800 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wide">Scenario: Web Breach</span>
+                    </div>
+                    <h2 class="text-3xl font-bold text-stone-900">Tier-1 Incident Simulation</h2>
+                    <p class="text-stone-500 mt-1">Refined steps and findings from the Splunk BOTSv1 workshop dataset.</p>
+                </header>
+
+                <div id="playbookContent" class="fade-in">
+                    <div class="flex flex-col items-center justify-center h-64 text-stone-400">
+                        <span class="text-6xl mb-4">🔍</span>
+                        <p class="text-lg">Select an investigative phase from the left panel to begin analysis.</p>
+                    </div>
+                </div>
+            </div>
+
+        </main>
+    </div>
+
+    <script>
+        // --- DATA STORE (Refined BOTSv1 Notes) ---
+        const scenarios = [
+            {
+                id: 1,
+                title: "1. Reconnaissance IP Identification",
+                icon: "📡",
+                goal: "Find the source IP with the most requests across multiple sourcetypes (Reconnaissance Phase).",
+                key_spl: 'index=botsv1 imreallynotbatman.com | stats count(src_ip) AS Requests BY src_ip | sort - Requests',
+                finding: "40.80.148.42 (This IP address consistently showed the highest request count across Suricata, stream:http, fortigate_utm, and iis logs, marking it as the likely scanner.)",
+                steps: [
+                    "Run base search for the affected URL (`imreallynotbatman.com`).",
+                    "Use the `top sourcetype` command to identify the key data sources.",
+                    "For each major sourcetype, run the search: `| stats count(src_ip) AS Requests BY src_ip | sort - Requests`.",
+                    "Validate the findings: Confirm if all sourcetypes indicate the same source IP with the highest request count."
+                ]
+            },
+            {
+                id: 2,
+                title: "2. Web Vulnerability Scanner Used",
+                icon: "🕵️",
+                goal: "Identify the specific product or software used by the attacker's IP.",
+                key_spl: 'src_ip=40.80.148.42 sourcetype=stream:http | top src_header',
+                finding: "Acunetix (Examining the `src_header` field, the User-Agent string clearly identifies the commercial web vulnerability scanner 'Acunetix'.)",
+                steps: [
+                    "Search for Stream HTTP data from the Attacker IP: `src_ip=<IP> sourcetype=stream:http`.",
+                    "In the results, focus on the `src_header` field (User Agent).",
+                    "Examine the headers for known scanner names or unusual strings.",
+                    "Use threat intelligence/OSINT to confirm the product associated with the header."
+                ]
+            },
+            {
+                id: 3,
+                title: "3. Target System and Vulnerable URI",
+                icon: "🎯",
+                goal: "Determine which web server and specific URI were the primary targets of the attack.",
+                key_spl: 'index=botsv1 src_ip=40.80.148.42 sourcetype=stream:http | stats count BY dest | top 1 dest',
+                finding: "Target IP: 192.168.250.70. Vulnerable URI: /joomla/administrator/index.php (This URI is the administrative login page of the Joomla CMS, suggesting a weak access control vulnerability or brute-force target.)",
+                steps: [
+                    "Search for HTTP requests from the attacker: `src_ip=<IP> sourcetype=stream:http`.",
+                    "Identify the destination IP (`dest`) with the highest request count.",
+                    "Run a search against the identified destination IP: `| stats count BY uri | sort - count`.",
+                    "Note the URI with the highest hits, as this is the likely target of exploitation or scanning."
+                ]
+            },
+            {
+                id: 4,
+                title: "4. Brute Force Origin & Credentials",
+                icon: "🔑",
+                goal: "Find the source IP responsible for a brute-force attack and identify compromised credentials.",
+                key_spl: 'sourcetype=stream:http dest_ip=192.168.250.70 http_method=POST form_data=*user*pass* | stats count BY src_ip | sort - count',
+                finding: "Brute Force IP: 23.22.63.114. Compromised Credentials: admin:batman (Logs showed multiple attempts from the BF IP, and a successful login event from another IP shortly after, using the credentials 'admin' and 'batman'.)",
+                steps: [
+                    "Filter data by destination IP and POST method: `dest_ip=<IP> http_method=POST`.",
+                    "Examine the `form_data` field format (e.g., `username=...&passwd=...`).",
+                    "Refine search using wildcards for usernames and passwords: `form_data=*user*pass*`.",
+                    "Run `| stats count BY src_ip | sort - count` to find the brute-force source.",
+                    "Search for successful login events to find the compromised username/password pair."
+                ]
+            },
+            {
+                id: 5,
+                title: "5. Uploaded Malicious Executable",
+                icon: "📂",
+                goal: "Identify any suspicious executable files uploaded to the web server by the attacker.",
+                key_spl: 'sourcetype=stream:http dest_ip=192.168.250.70 *.exe | top part_filename{}',
+                finding: "Executable Found: /_vti_bin/shtml.exe (Although historically a legitimate file for FrontPage extensions, its presence and activity on the breached server indicate it was used maliciously for code execution or DoS attacks.)",
+                steps: [
+                    "Search for known file extensions transferred to the server: `dest_ip=<IP> *.exe`.",
+                    "Review `part_filename{}` field for suspicious files (`shtml.exe`).",
+                    "Validate findings using other sourcetypes (e.g., `sourcetype=suricata` or `sourcetype=fileinfo`)."
+                ]
+            },
+            {
+                id: 6,
+                title: "6. MD5 Hash of the Uploaded File",
+                icon: "🔢",
+                goal: "Obtain the MD5/SHA256 hash of the malicious executable for threat intelligence lookups.",
+                key_spl: '"shtml.exe" sourcetype=XmlWinEventLog EventCode=1 CommandLine="shtml.exe" | stats values(MD5)',
+                finding: "MD5 Hash (Example): d275990264024790382437009276274a (Hashes are critical forensic identifiers for checking reputation in VirusTotal and identifying known malware.)",
+                steps: [
+                    "Identify the sourcetype containing file hashes (e.g., Sysmon/XmlWinEventLog).",
+                    "Search for the executable name within the Sysmon logs (EventCode=1 for Process Creation).",
+                    "Use `| stats values(MD5)` or `| stats values(SHA256)` to extract the cryptographic hash.",
+                    "Use OSINT (VirusTotal) to check the hash reputation."
+                ]
+            },
+            {
+                id: 7,
+                title: "7. Web Server Outbound Defacement Traffic",
+                icon: "📤",
+                goal: "Identify the external communication initiated by the web server (C2 or downloading defacement files).",
+                key_spl: 'src_ip=192.168.250.70 sourcetype=suricata dest_ip!=192.168.250.70 | top http.url',
+                finding: "Exfiltration/Download URL: jumpingcrab.com:1337/poisons-coming-for-you-batman.jpeg (The web server communicated with an external IP on a non-standard port 1337 to download a defacement image, confirming the compromise.)",
+                steps: [
+                    "Filter by web server source IP: `src_ip=<Web Server IP>`.",
+                    "Exclude internal destinations to focus on outbound traffic: `NOT dest_ip=<Internal IP>`.",
+                    "Review Suricata/Firewall logs for HTTP traffic (`http.url` and `category`).",
+                    "Identify suspicious URLs and filenames (`.jpeg`, `.png`, executables) from external, non-standard destinations."
+                ]
+            }
+        ];
+
+        // --- GLOBAL STATE & CONFIG ---
+        let currentScenarioIndex = 0;
+        let chartInstance = null;
+
+        // --- DOM MANIPULATION & LOGIC ---
+
+        document.addEventListener('DOMContentLoaded', () => {
+            initSourcetypeChart();
+            renderNavigation();
+            loadScenario(0);
+        });
+
+        function renderNavigation() {
+            const navContainer = document.getElementById('playbookNav');
+            navContainer.innerHTML = '';
+            scenarios.forEach((s, index) => {
+                const btn = document.createElement('button');
+                btn.className = `nav-item w-full text-left px-3 py-2 rounded-lg flex items-center gap-3 hover:bg-stone-100 transition duration-200 border-l-4 border-transparent text-sm ${index === currentScenarioIndex ? 'active' : ''}`;
+                btn.innerHTML = `
+                    <span class="text-xl">${s.icon}</span>
+                    <span class="text-stone-700 font-medium">${s.title}</span>
+                `;
+                btn.onclick = () => {
+                    currentScenarioIndex = index;
+                    renderNavigation();
+                    loadScenario(index);
+                };
+                navContainer.appendChild(btn);
+            });
+        }
+
+        function loadScenario(index) {
+            const s = scenarios[index];
+            const contentContainer = document.getElementById('playbookContent');
+            
+            // Build Content HTML
+            const html = `
+                <div class="fade-in">
+                    <h3 class="text-2xl font-bold text-stone-800 mb-4 flex items-center gap-2">
+                        ${s.icon} ${s.title}
+                    </h3>
+                    <p class="text-stone-600 mb-6 border-b border-stone-200 pb-4">
+                        <strong>Goal:</strong> ${s.goal}
+                    </p>
+
+                    <div class="grid grid-cols-1 xl:grid-cols-3 gap-8">
+                        
+                        <div class="xl:col-span-2 space-y-6">
+                            
+                            <div class="bg-white p-5 rounded-xl shadow-sm border border-stone-200">
+                                <h4 class="font-bold text-stone-700 mb-3 flex items-center gap-2">
+                                    <span>💻</span> Key SPL Command
+                                </h4>
+                                <div id="splCode" class="spl-command p-4 rounded-lg text-sm text-stone-800 cursor-pointer transition border border-stone-300" 
+                                     onclick="copyToClipboard(this)">${s.key_spl}</div>
+                                <p class="text-xs text-stone-500 mt-2">Click the command block to copy to clipboard.</p>
+                            </div>
+
+                            <div class="bg-white p-5 rounded-xl shadow-sm border border-stone-200">
+                                <h4 class="font-bold text-stone-700 mb-3 flex items-center gap-2">
+                                    <span>📋</span> Triage Procedure
+                                </h4>
+                                <ul class="space-y-3">
+                                    ${s.steps.map((step, i) => `
+                                        <li class="flex items-start gap-3 cursor-pointer group" onclick="toggleCheck(this)">
+                                            <div class="w-5 h-5 rounded border-2 border-stone-300 flex-shrink-0 mt-0.5 flex items-center justify-center transition group-hover:border-orange-500 bg-white">
+                                                <span class="opacity-0 check-mark text-orange-600 text-xs font-bold">✓</span>
+                                            </div>
+                                            <span class="text-stone-700 text-sm group-hover:text-stone-900 transition leading-relaxed">${step}</span>
+                                        </li>
+                                    `).join('')}
+                                </ul>
+                            </div>
+                        </div>
+
+                        <div class="space-y-6">
+                            <div class="bg-orange-50 p-5 rounded-xl border border-orange-200 shadow-sm">
+                                <h4 class="font-bold text-orange-800 mb-3 flex items-center gap-2">
+                                    <span class="text-2xl">💡</span> Key Finding
+                                </h4>
+                                <p class="text-orange-900 text-sm leading-relaxed">${s.finding}</p>
+                            </div>
+                            
+                            <div class="bg-white p-5 rounded-xl shadow-sm border border-stone-200">
+                                <h4 class="font-bold text-stone-700 mb-3">Context / Kill Chain</h4>
+                                <p class="text-stone-600 text-sm leading-relaxed">
+                                    This phase is critical for moving the investigation from ${s.id === 1 ? 'initial alert' : 'previous findings'} to **${s.id < 4 ? 'Reconnaissance/Delivery' : s.id === 4 ? 'Exploitation/Installation' : 'Command & Control'}**.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            contentContainer.innerHTML = html;
+        }
+
+        // --- UTILITY FUNCTIONS ---
+        
+        window.toggleCheck = function(el) {
+            const check = el.querySelector('.check-mark');
+            const box = el.querySelector('div');
+            const text = el.querySelector('span:last-child');
+            
+            if (check.classList.contains('opacity-0')) {
+                check.classList.remove('opacity-0');
+                box.classList.add('bg-orange-100', 'border-orange-500');
+                text.classList.add('line-through', 'text-stone-400');
+            } else {
+                check.classList.add('opacity-0');
+                box.classList.remove('bg-orange-100', 'border-orange-500');
+                text.classList.remove('line-through', 'text-stone-400');
+            }
+        };
+
+        window.copyToClipboard = function(el) {
+            const text = el.textContent;
+            navigator.clipboard.writeText(text).then(() => {
+                el.style.backgroundColor = '#EA580C'; /* Terracotta */
+                el.style.color = '#fff';
+                el.textContent = 'Copied to clipboard!';
+                setTimeout(() => {
+                    el.style.backgroundColor = '#E7E5E4';
+                    el.style.color = '#1C1917';
+                    el.textContent = text;
+                }, 1000);
+            }).catch(err => {
+                console.error('Failed to copy: ', err);
+                el.textContent = 'Failed to copy!';
+            });
+        };
+
+        // --- CHART CONFIGURATION ---
+        function initSourcetypeChart() {
+            const ctx = document.getElementById('sourcetypeChart').getContext('2d');
+            const data = {
+                labels: ['suricata (IDS)', 'stream:http', 'fortigate_utm', 'iis (Web Log)'],
+                datasets: [{
+                    label: 'Event Count',
+                    data: [30625, 22200, 13918, 11940],
+                    backgroundColor: ['#EA580C', '#F97316', '#FDBA74', '#D6D3D1'],
+                    borderRadius: 4
+                }]
+            };
+
+            if (chartInstance) {
+                chartInstance.destroy();
+            }
+
+            chartInstance = new Chart(ctx, {
+                type: 'bar',
+                data: data,
+                options: {
+                    indexAxis: 'y',
+                    maintainAspectRatio: false,
+                    responsive: true,
+                    scales: {
+                        x: {
+                            beginAtZero: true,
+                            grid: { display: false },
+                            ticks: { color: '#78716C', font: { size: 10 } }
+                        },
+                        y: {
+                            grid: { display: false },
+                            ticks: { color: '#57534E', font: { size: 10 } }
+                        }
+                    },
+                    plugins: {
+                        legend: { display: false },
+                        title: {
+                            display: true,
+                            text: 'Data Source Visibility (Events)',
+                            color: '#57534E',
+                            font: { size: 12, weight: '600' }
+                        },
+                        tooltip: {
+                            callbacks: {
+                                title: function(tooltipItems) { return tooltipItems[0].label; },
+                                label: function(context) { return ' Events: ' + context.raw.toLocaleString(); }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+    </script>
+</body>
+</html>
